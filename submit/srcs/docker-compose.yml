@@ -1,0 +1,8 @@
+
+services:
+  mariadb:
+    build:
+      context: requirements/mariadb
+      dockerfile: Dockerfile
+      args:
+        DEBIAN_VERSION: 11.11-slim
