@@ -9,9 +9,19 @@ services:
 
   nginx:
     build:
-      context: requirements/nginx
+      context: ${NGINX_CONTEXT}
       dockerfile: Dockerfile
       args:
         BASE_IMAGE: ${BASE_IMAGE}
-    expose:
+    ports:
       - 8000:80
+    develop:
+      watch:
+        - path: ${NGINX_CONTEXT}/conf/ssl.cnf
+          target: /etc/nginx/conf.d/ssl.cnf
+          action: sync+restart
+        - path: ${NGINX_CONTEXT}/conf/docker-entrypoint.sh
+          target: /docker-entrypoint.sh
+          action: sync+restart
+        - path: ${NGINX_CONTEXT}/
+          action: rebuild
