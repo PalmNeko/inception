@@ -13,12 +13,14 @@ services:
       dockerfile: Dockerfile
       args:
         BASE_IMAGE: ${BASE_IMAGE}
+        DOMAIN: ${DOMAIN}
+      target: dev
     ports:
-      - 8000:80
+      - 443:443
     develop:
       watch:
-        - path: ${NGINX_CONTEXT}/conf/ssl.cnf
-          target: /etc/nginx/conf.d/ssl.cnf
+        - path: ${NGINX_CONTEXT}/conf/ssl.conf
+          target: /etc/nginx/conf.d/ssl.conf
           action: sync+restart
         - path: ${NGINX_CONTEXT}/conf/docker-entrypoint.sh
           target: /docker-entrypoint.sh
