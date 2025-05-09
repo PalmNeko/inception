@@ -1,37 +1,21 @@
 # arguments
 ARG BASE_IMAGE
 
-# prepare
-FROM ${BASE_IMAGE} as prepare
-
-ENV DOMAIN=${DOMAIN}
-
-COPY tools/prepare.sh /prepare.sh
-
-RUN <<EOF
-    apt-get -y update
-    apt-get -y upgrade
-    apt-get -y install openssl
-    bash /prepare.sh
-EOF
-
 # publish
 FROM ${BASE_IMAGE} as prod
 
+ENV DOMAIN=${DOMAIN}
+
 RUN <<EOF
     apt-get -y update
     apt-get -y upgrade
-    apt-get install -y nginx
+    apt-get install -y nginx openssl
 EOF
 
 EXPOSE 443/tcp
 
 COPY /tools/docker-entrypoint.sh /
 COPY /conf/ssl.conf /etc/nginx/conf.d/ssl.conf
-COPY --from=prepare --chown=nginx:nginx \
-    /ssl/nginx.key /ssl/nginx.key
-COPY --from=prepare --chown=nginx:nginx \
-    /ssl/nginx.crt /ssl/nginx.crt
 
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
 CMD [ "nginx", "-g", "daemon off;" ]
