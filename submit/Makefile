@@ -5,7 +5,7 @@ up:
 	$(COMPOSE) up --build $(service)
 
 detach:
-	$(COMPOSE) up --build -d ;$(service)
+	$(COMPOSE) up --build -d $(service)
 
 build:
 	$(COMPOSE) build
