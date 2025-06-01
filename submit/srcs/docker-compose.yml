@@ -1,4 +1,22 @@
 
+# common
+x-common-arguments: &common-arg
+  BASE_IMAGE: ${BASE_IMAGE:?error}
+  DOMAIN: ${DOMAIN:?error}
+  
+# development settings by Extensions and anchor
+x-nginx-develop: &nginx-dev
+  watch:
+    - path: ${NGINX_CONTEXT}/conf/ssl.conf
+      target: /etc/nginx/conf.d/ssl.conf
+      action: sync+restart
+    - path: ${NGINX_CONTEXT}/conf/docker-entrypoint.sh
+      target: /docker-entrypoint.sh
+      action: sync+restart
+    - path: ${NGINX_CONTEXT}/
+      action: rebuild
+
+# services
 services:
   mariadb:
     build:
@@ -14,16 +32,20 @@ services:
       args:
         BASE_IMAGE: ${BASE_IMAGE}
         DOMAIN: ${DOMAIN}
-      target: dev
+      target: prod
     ports:
-      - 443:443
+      - 4430:443
     develop:
-      watch:
-        - path: ${NGINX_CONTEXT}/conf/ssl.conf
-          target: /etc/nginx/conf.d/ssl.conf
-          action: sync+restart
-        - path: ${NGINX_CONTEXT}/conf/docker-entrypoint.sh
-          target: /docker-entrypoint.sh
-          action: sync+restart
-        - path: ${NGINX_CONTEXT}/
-          action: rebuild
+      <<: *nginx-dev
+
+  wordpress:
+    build:
+      context: ${WORDPRESS_CONTEXT}
+      dockerfile: Dockerfile
+      args:
+        <<: *common-arg
+    ports:
+      - 8000:80
+    command: "cat"
+    tty: true
+    init: true

@@ -2,7 +2,7 @@
 ARG BASE_IMAGE
 
 # publish
-FROM ${BASE_IMAGE} as prod
+FROM ${BASE_IMAGE} AS prod
 
 ENV DOMAIN=${DOMAIN}
 
@@ -14,13 +14,13 @@ EOF
 
 EXPOSE 443/tcp
 
-COPY /tools/docker-entrypoint.sh /
+COPY --chown=root:root --chmod=0770 /tools/docker-entrypoint.sh /
 COPY /conf/ssl.conf /etc/nginx/conf.d/ssl.conf
 
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
 CMD [ "nginx", "-g", "daemon off;" ]
 
-FROM prod as dev
+FROM prod AS dev
 
 # install development tools
 RUN <<EOF
