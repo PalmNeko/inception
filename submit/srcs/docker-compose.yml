@@ -19,6 +19,7 @@ x-nginx-develop: &nginx-dev
 # services
 services:
   mariadb:
+    hostname: mariadb
     build:
       context: requirements/mariadb
       dockerfile: Dockerfile
@@ -26,6 +27,7 @@ services:
         BASE_IMAGE: ${BASE_IMAGE}
 
   nginx:
+    hostname: nginx
     build:
       context: ${NGINX_CONTEXT}
       dockerfile: Dockerfile
@@ -39,6 +41,7 @@ services:
       <<: *nginx-dev
 
   wordpress:
+    hostname: wordpress
     build:
       context: ${WORDPRESS_CONTEXT}
       dockerfile: Dockerfile
@@ -46,6 +49,3 @@ services:
         <<: *common-arg
     ports:
       - 8000:80
-    command: "cat"
-    tty: true
-    init: true
