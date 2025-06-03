@@ -40,5 +40,4 @@ install-dev-tools:
 		 less \
 		 nc \
 		 apt-file \
-		 lsof \
-		 command
+		 lsof
