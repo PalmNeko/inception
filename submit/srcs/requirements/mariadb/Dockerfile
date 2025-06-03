@@ -7,8 +7,9 @@ apt-get -y upgrade
 apt-get install -y mariadb-server
 EOF
 
-EXPOSE 3306/tcp
+# COPY conf/mysql /etc/mysql
 
-# COPY  entrypoint.sh TODO:
-# ENTRYPOINT [""] TODO:
-# CMD ["mariadbd"]
+# USER "mysql"
+COPY --chown=root:root --chmod=0770 tools/docker-entrypoint.sh /
+ENTRYPOINT [ "/docker-entrypoint.sh" ]
+CMD [ "mariadbd" ]
