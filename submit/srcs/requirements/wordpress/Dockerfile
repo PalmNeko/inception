@@ -9,7 +9,8 @@ ENV DOMAIN=${DOMAIN}
 RUN <<EOF
     apt-get update -y && apt-get upgrade -y
     apt-get install -y \
-        php-fpm
+        php-fpm \
+        mariadb-client
 EOF
 
 COPY conf/fpm/php-fpm.conf /etc/php/7.4/fpm
