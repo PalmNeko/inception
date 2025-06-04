@@ -19,6 +19,7 @@ x-nginx-develop: &nginx-dev
 # services
 services:
   mariadb:
+    container_name: mariadb
     hostname: mariadb
     build:
       context: requirements/mariadb
@@ -27,6 +28,7 @@ services:
         BASE_IMAGE: ${BASE_IMAGE}
 
   nginx:
+    container_name: nginx
     hostname: nginx
     build:
       context: ${NGINX_CONTEXT}
@@ -41,6 +43,7 @@ services:
       <<: *nginx-dev
 
   wordpress:
+    container_name: wordpress
     hostname: wordpress
     build:
       context: ${WORDPRESS_CONTEXT}
