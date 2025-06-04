@@ -70,8 +70,6 @@ services:
       dockerfile: Dockerfile
       args:
         <<: *common-arg
-    ports:
-      - 8000:80
     networks:
       - frontend-network
       - backend-network
