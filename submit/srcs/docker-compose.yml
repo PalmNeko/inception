@@ -36,6 +36,8 @@ services:
   mariadb:
     container_name: mariadb
     hostname: mariadb
+    pull_policy: never
+    image: mariadb:inception
     build:
       context: requirements/mariadb
       dockerfile: Dockerfile
@@ -47,6 +49,8 @@ services:
   nginx:
     container_name: nginx
     hostname: nginx
+    pull_policy: never
+    image: nginx:inception
     build:
       context: ${NGINX_CONTEXT}
       dockerfile: Dockerfile
@@ -65,6 +69,8 @@ services:
   wordpress:
     container_name: wordpress
     hostname: wordpress
+    pull_policy: never
+    image: wordpress:inception
     build:
       context: ${WORDPRESS_CONTEXT}
       dockerfile: Dockerfile
