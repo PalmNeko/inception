@@ -14,7 +14,7 @@ init_file = /etc/mysql/init-file/wp.sql
 #
 
 user                    = mysql
-pid-file                = /run/mysqld/mysqld.pid
+pid-file                = /tmp/run/mysqld/mysqld.pid
 basedir                 = /usr
 datadir                 = /var/lib/mysql
 tmpdir                  = /tmp
