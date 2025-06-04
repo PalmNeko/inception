@@ -2,16 +2,16 @@
 COMPOSE  =  docker compose -f srcs/docker-compose.yml
 
 up:
-	$(COMPOSE) up --build $(service)
+	COMPOSE_BAKE=true $(COMPOSE) up --build $(service)
 
 detach:
-	$(COMPOSE) up --build -d $(service)
+	COMPOSE_BAKE=true $(COMPOSE) up --build -d $(service)
 
 down:
 	$(COMPOSE) down $(service)
 
 build:
-	$(COMPOSE) build
+	COMPOSE_BAKE=true $(COMPOSE) build
 
 bash:
 	$(COMPOSE) exec -it $(service) bash
