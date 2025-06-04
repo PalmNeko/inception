@@ -42,3 +42,20 @@
  * [grant](https://mariadb.com/kb/en/grant/)
  * [flush](https://mariadb.com/kb/en/flush/)
  * [create database](https://mariadb.com/kb/en/create-database/)
+
+ # Wordpress (php-fpm)
+
+ ## download wordpress path
+ * [releases](https://ja.wordpress.org/download/releases/)
+ * wordpress files: https://ja.wordpress.org/wordpress-6.8.1-ja.tar.gz
+ * [PHPの互換性](https://ja.wordpress.org/team/handbook/core/references/php-compatibility-and-wordpress-versions/)
+
+ ## connect command
+ ```
+ apt-get install -y libfcgi
+ ```
+ ```
+ SCRIPT_FILENAME=/srv/wordpress/index.php \
+ REQUEST_METHOD=GET \
+	cgi-fcgi -bind -connect wordpress:9000
+ ```
