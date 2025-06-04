@@ -49,28 +49,23 @@ prune: down
 bash:
 	$(COMPOSE) exec -it $(service) bash
 
-install-dev-tools:
+install-cgi-tools:
 	$(COMPOSE) exec $(service) apt-get install -y \
-		unar \
-		libfcgi \
+		libfcgi
+	@: cgi-fcgi
+
+install-network-tools:
+	$(COMPOSE) exec $(service) apt-get install -y \
 		iproute2 \
 		iputils-ping \
-	; : unzip and zipfile \
-		 cgi-fcgi \
-		 ss \
-		 ping \
-		 command
+		netcat-openbsd \
+		lsof
+	@: ss, ping, nc, lsof
+
+install-utils:
 	$(COMPOSE) exec $(service) apt-get install -y \
 		vim-tiny \
 		man \
-		less \
-		netcat-openbsd \
 		apt-file \
-		lsof \
-		; : for \
-		 vim.tiny \
-		 man \
-		 less \
-		 nc \
-		 apt-file \
-		 lsof
+		less \
+		lsof
