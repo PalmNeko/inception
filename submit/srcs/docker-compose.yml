@@ -16,6 +16,21 @@ x-nginx-develop: &nginx-dev
     - path: ${NGINX_CONTEXT}/
       action: rebuild
 
+# network settings
+x-inception-internal-network: &internal-container-network
+  driver: bridge
+  attachable: false
+  internal: true
+  enable_ipv4: true
+  enable_ipv6: false
+
+x-inception-external-network: &external-container-network
+  driver: bridge
+  attachable: false
+  internal: false
+  enable_ipv4: true
+  enable_ipv6: false
+
 # services
 services:
   mariadb:
@@ -26,6 +41,8 @@ services:
       dockerfile: Dockerfile
       args:
         BASE_IMAGE: ${BASE_IMAGE}
+    networks:
+      - backend-network
 
   nginx:
     container_name: nginx
@@ -39,6 +56,9 @@ services:
       target: prod
     ports:
       - 4430:443
+    networks:
+      - external-network
+      - frontend-network
     develop:
       <<: *nginx-dev
 
@@ -52,3 +72,18 @@ services:
         <<: *common-arg
     ports:
       - 8000:80
+    networks:
+      - frontend-network
+      - backend-network
+
+# network
+networks:
+  external-network:
+    name: inception-external
+    <<: *external-container-network
+  frontend-network:
+    name: inception-frontend
+    <<: *internal-container-network
+  backend-network:
+    name: inception-backend
+    <<: *internal-container-network
