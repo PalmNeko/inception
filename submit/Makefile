@@ -2,16 +2,45 @@
 COMPOSE  =  docker compose -f srcs/docker-compose.yml
 
 up:
-	COMPOSE_BAKE=true $(COMPOSE) up --build $(service)
+	COMPOSE_BAKE=true $(COMPOSE) up $(service)
 
 detach:
-	COMPOSE_BAKE=true $(COMPOSE) up --build -d $(service)
+	COMPOSE_BAKE=true $(COMPOSE) up -d $(service)
 
 down:
 	$(COMPOSE) down $(service)
 
 build:
 	COMPOSE_BAKE=true $(COMPOSE) build
+
+prune: down
+	@printf '***** Are you sure delete all container, image, network and volume ***** ? y/n ' ; read YN ; test "$$YN" = "y"
+	@echo 'containers - stop'
+	@sleep 2
+	@CONTAINERS=$$(docker container ls -aq) ; test -n "$$CONTAINERS" \
+		&& docker container stop $$CONTAINERS || true
+	@echo 'containers - remove'
+	@sleep 2
+	@CONTAINERS=$$(docker container ls -aq) ; test -n "$$CONTAINERS" \
+		&& docker container remove $$CONTAINERS || true
+	@echo 'networks - remove'
+	@sleep 2
+	@NETWORKS=$$(docker network ls -q) ; test -n "$$NETWORKS" \
+		&& docker network rm $$NETWORKS || true
+	@echo 'images - prune'
+	@sleep 2
+	@docker image prune -f
+	@echo 'images - remove'
+	@sleep 2
+	@IMAGES=$$(docker image list --format "{{.Repository}}:{{.Tag}}") ; test -n "$$IMAGES" \
+		&& docker image rm $$IMAGES || true
+	@echo 'volumes - remove'
+	@sleep 2
+	@VOLUMES=$$(docker volume ls -q) ; test -n "$$VOLUMES" \
+		&& docker volume remove $$VOLUMES || true
+	@echo 'build cache - remove'
+	@sleep 2
+	@docker buildx prune -f
 
 bash:
 	$(COMPOSE) exec -it $(service) bash
