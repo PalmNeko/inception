@@ -1,17 +1,21 @@
 
-COMPOSE  =  docker compose -f srcs/docker-compose.yml
+COMPOSE_ENV = COMPOSE_BAKE=true
+COMPOSE  = $(COMPOSE_ENV) docker compose -f srcs/docker-compose.yml
 
 up:
-	COMPOSE_BAKE=true $(COMPOSE) up $(service)
+	$(COMPOSE) up $(CMD_FLAGS) $(service)
 
-detach:
-	COMPOSE_BAKE=true $(COMPOSE) up -d $(service)
+detach: CMD_FLAGS += -d
+detach: up
 
 down:
-	$(COMPOSE) down $(service)
+	$(COMPOSE) down $(CMD_FLAGS) $(service)
 
 build:
-	COMPOSE_BAKE=true $(COMPOSE) build
+	$(COMPOSE) build
+
+rebuild-up: CMD_FLAGS += --build
+rebuild-up: up
 
 prune: down
 	@printf '***** Are you sure delete all container, image, network and volume ***** ? y/n ' ; read YN ; test "$$YN" = "y"
