@@ -8,14 +8,13 @@ up:
 detach: CMD_FLAGS += -d
 detach: up
 
-down:
-	$(COMPOSE) down $(CMD_FLAGS) $(service)
-
 build:
 	$(COMPOSE) build
 
-rebuild-up: CMD_FLAGS += --build
-rebuild-up: up
+stats restart down:
+	$(COMPOSE) $@ $(CMD_FLAGS) $(service)
+
+rebuild-up: build up
 
 prune: down
 	@printf '***** Are you sure delete all container, image, network and volume ***** ? y/n ' ; read YN ; test "$$YN" = "y"
