@@ -80,6 +80,10 @@ services:
       - source: nginx_wordpress_config
         target: /etc/nginx/conf.d/ssl.conf
         mode: 0440
+    volumes:
+      - type: bind
+        source: ${HOME}/data/wordpress-core
+        target: /srv/wordpress/
     develop:
       <<: *nginx-dev
 
@@ -106,6 +110,10 @@ services:
       - source: wordpress_php_fpm_pool_dir
         target: /etc/php/7.4/fpm/pool.d
         mode: 750
+    volumes:
+      - type: bind
+        source: ${HOME}/data/wordpress-core
+        target: /srv/wordpress/
 
 # configs
 configs:

@@ -10,9 +10,7 @@ RUN <<EOF
 EOF
 
 RUN <<EOF
-    wget https://ja.wordpress.org/wordpress-6.8.1-ja.tar.gz -O wordpress.tar.gz
-    mkdir -p /srv
-    tar -xf wordpress.tar.gz -C /srv
+    wget https://ja.wordpress.org/wordpress-6.8.1-ja.tar.gz -O /wordpress.tar.gz
 EOF
 
 # publish
@@ -24,8 +22,7 @@ RUN <<EOF
         php-fpm \
         php-mysql
 EOF
-
-COPY --from=prepare --chown=www-data:www-data /srv /srv
+COPY --from=prepare --chown=www-data:www-data /wordpress.tar.gz /
 
 COPY --chown=root:root --chmod=0770 /tools/docker-entrypoint.sh /docker-entrypoint.sh
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
