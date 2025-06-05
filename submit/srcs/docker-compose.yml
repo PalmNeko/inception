@@ -133,7 +133,7 @@ networks:
     <<: *external-container-network
   frontend-network:
     name: inception-frontend
-    <<: *internal-container-network
+    <<: *external-container-network
   backend-network:
     name: inception-backend
-    <<: *internal-container-network
+    <<: *external-container-network
