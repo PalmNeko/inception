@@ -55,6 +55,8 @@ services:
       - source: mariadb_initdb_file
         target: /etc/mysql/init-file/wp.sql
         mode: 0440
+    volumes:
+      - mariadbd-data:/var/lib/mysql
 
   nginx:
     container_name: nginx
@@ -81,9 +83,7 @@ services:
         target: /etc/nginx/conf.d/ssl.conf
         mode: 0440
     volumes:
-      - type: bind
-        source: ${HOME}/data/wordpress-core
-        target: /srv/wordpress/
+      - wordpress-data:/srv/wordpress/
     develop:
       <<: *nginx-dev
 
@@ -111,9 +111,7 @@ services:
         target: /etc/php/7.4/fpm/pool.d
         mode: 750
     volumes:
-      - type: bind
-        source: ${HOME}/data/wordpress-core
-        target: /srv/wordpress/
+      - wordpress-data:/srv/wordpress/
 
 # configs
 configs:
@@ -133,6 +131,19 @@ configs:
     file: ${MARIADB_CONTEXT}/conf/mysql/mariadb.conf.d/50-server.cnf
   mariadb_initdb_file:
     file: ${MARIADB_CONTEXT}/conf/mysql/init-file/wp.sql
+
+# volumes
+volumes:
+  wordpress-data:
+    driver_opts:
+      type: 'none'
+      o: bind
+      device: ${HOME}/data/wordpress-core
+  mariadbd-data:
+    driver_opts:
+      type: 'none'
+      o: bind
+      device: ${HOME}/data/mariadbd-data
 
 # network
 networks:
