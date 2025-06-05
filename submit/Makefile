@@ -3,6 +3,8 @@ COMPOSE_ENV = COMPOSE_BAKE=true
 COMPOSE  = $(COMPOSE_ENV) docker compose -f srcs/docker-compose.yml
 
 up:
+	mkdir -p ${HOME}/data/wordpress-core
+	mkdir -p ${HOME}/data/mariadbd-data
 	$(COMPOSE) up $(CMD_FLAGS) $(service)
 
 detach: CMD_FLAGS += -d
@@ -13,6 +15,9 @@ build:
 
 stats restart down:
 	$(COMPOSE) $@ $(CMD_FLAGS) $(service)
+
+clean-volumes:
+	docker run --mount type=bind,source=$(HOME)/data,target=/data --rm alpine sh -c "rm -rf /data/*"
 
 re: build up
 
