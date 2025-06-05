@@ -14,7 +14,7 @@ build:
 stats restart down:
 	$(COMPOSE) $@ $(CMD_FLAGS) $(service)
 
-rebuild-up: build up
+re: build up
 
 prune: down
 	@printf '***** Are you sure delete all container, image, network and volume ***** ? y/n ' ; read YN ; test "$$YN" = "y"
