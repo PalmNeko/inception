@@ -15,7 +15,6 @@ EOF
 EXPOSE 443/tcp
 
 COPY --chown=root:root --chmod=0770 /tools/docker-entrypoint.sh /
-COPY /conf/ssl.conf /etc/nginx/conf.d/ssl.conf
 
 ENTRYPOINT [ "/docker-entrypoint.sh" ]
 CMD [ "nginx", "-g", "daemon off;" ]

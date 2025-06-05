@@ -25,9 +25,6 @@ RUN <<EOF
         php-mysql
 EOF
 
-COPY conf/fpm/php-fpm.conf /etc/php/7.4/fpm
-COPY conf/fpm/php.ini /etc/php/7.4/fpm
-COPY conf/fpm/pool.d/www.conf /etc/php/7.4/fpm/pool.d/www.conf
 COPY --from=prepare --chown=www-data:www-data /srv /srv
 
 COPY --chown=root:root --chmod=0770 /tools/docker-entrypoint.sh /docker-entrypoint.sh
