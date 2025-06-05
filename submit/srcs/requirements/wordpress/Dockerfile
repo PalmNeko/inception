@@ -18,13 +18,11 @@ EOF
 # publish
 FROM ${BASE_IMAGE} as publish
 
-ENV DOMAIN=${DOMAIN}
-
 RUN <<EOF
     apt-get update -y && apt-get upgrade -y
     apt-get install -y \
         php-fpm \
-        mariadb-client
+        php-mysql
 EOF
 
 COPY conf/fpm/php-fpm.conf /etc/php/7.4/fpm
