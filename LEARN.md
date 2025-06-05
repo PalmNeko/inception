@@ -62,3 +62,40 @@
  REQUEST_METHOD=GET \
 	cgi-fcgi -bind -connect wordpress:9000
  ```
+
+ # Vagrant
+ ```
+ cd ubuntu2004
+ vagrant init ubuntu-20.04
+ vagrant up
+ vagrant ssh
+ ```
+ > default settings -> user: vagrant pass: vagrant
+
+ ## install packages
+ I should remove this section with overwriting the Vagrantfile.
+
+ ### install docker
+ ```sh
+ sudo curl -fsSL https://get.docker.com -o get-docker.sh
+ sudo sh ./get-docker.sh
+ ```
+
+ ### update docker with rootless mode
+ ```sh
+ sudo sh -eux <<EOF
+ # Install newuidmap & newgidmap binaries
+ apt-get install -y uidmap
+ EOF
+ dockerd-rootless-setuptool.sh install
+ ```
+
+ ### check installed
+ ```sh
+ docker run -it --rm alpine
+ ```
+
+ ### install Make
+ ```sh
+ sudo apt-get install -y make
+ ```
