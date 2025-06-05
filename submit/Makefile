@@ -67,4 +67,5 @@ install-utils:
 		man \
 		apt-file \
 		less \
-		lsof
+		lsof \
+		procps
