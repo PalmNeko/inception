@@ -12,8 +12,8 @@ Vagrant.configure("2") do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
-  config.vm.box = "ubuntu/focal64"
-  config.vm.box_version = "20240821.0.1"
+  config.vm.box = "ubuntu/jammy64"
+  config.vm.box_version = "20241002.0.0"
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -79,18 +79,13 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: <<-SHELL
     if [ ! -f /home/vagrant/.provisioned ]; then
       set -eux
-      add-apt-repository -y ppa:apt-fast/stable
       apt-get update
-      echo debconf apt-fast/maxdownloads string 16 | debconf-set-selections
-      echo debconf apt-fast/dlflag boolean true | debconf-set-selections
-      echo debconf apt-fast/aptmanager string apt-get | debconf-set-selections
-      apt-get install -y apt-fast
-      apt-fast install -y uidmap curl make xorg xinit openbox xterm
-      echo "exec openbox-session" > ~/.xinitrc
-      # su - vagrant -c "curl -fsSL https://get.docker.com -o get-docker.sh"
-      # su - vagrant -c "sh ./get-docker.sh"
-      # su - vagrant -c "dockerd-rootless-setuptool.sh install"
-      echo '[[ -z $DISPLAY && $XDG_VTNR -eq 1 ]] && startx' >> ~/.profile
+      apt-get install -y uidmap curl make xorg xinit openbox xterm firefox firefox-locale-ja
+      echo "exec openbox-session" > /home/vagrant/.xinitrc
+      echo '[[ -z $DISPLAY && $XDG_VTNR -eq 1 ]] && startx' >> /home/vagrant/.profile
+      chown vagrant:vagrant /home/vagrant/.xinitrc /home/vagrant/.profile
+      su - vagrant -c "curl -fsSL https://get.docker.com -o get-docker.sh"
+      su - vagrant -c "sh ./get-docker.sh"
       touch /home/vagrant/.provisioned
       reboot
     fi
