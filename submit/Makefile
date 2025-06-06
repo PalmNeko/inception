@@ -2,13 +2,15 @@
 COMPOSE_ENV = COMPOSE_BAKE=true
 COMPOSE  = $(COMPOSE_ENV) docker compose -f srcs/docker-compose.yml
 
-up:
+up: init
 	mkdir -p ${HOME}/data/wordpress-core
 	mkdir -p ${HOME}/data/mariadbd-data
 	$(COMPOSE) up $(CMD_FLAGS) $(service)
 
 detach: CMD_FLAGS += -d
 detach: up
+
+init: mariadb-init
 
 build:
 	$(COMPOSE) build
@@ -84,7 +86,6 @@ install-utils:
 FILE_GENERATOR_SCRIPT   =  tools/file_generator.sh
 
 # mariadb
-MARIADB_REQUIRE   = $(MARIADB_DST_CONF)
 
 MARIADB_CONTEXT        = srcs/requirements/mariadb
 MARIADB_ENVIRONS       = \
@@ -103,13 +104,14 @@ MARIADB_CONF_DIST_DIR  = $(MARIADB_CONTEXT)/dist/conf
 MARIADB_CONF           = $(subst $(MARIADB_CONF_DIR)/,,$(shell find $(MARIADB_CONF_DIR) -name "*.cnf" -o -name "*.sql"))
 MARIADB_DST_CONF       = $(addprefix $(MARIADB_CONF_DIST_DIR)/,$(MARIADB_CONF))
 
+mariadb-init: $(MARIADB_DST_CONF) $(MARIADB_ENV_FILE)
+
 $(MARIADB_ENV_FILE): $(MARIADB_ENV_GEN_SCRIPT)
 	mkdir -p $(@D)
-	test -f $@ && . $@ ; bash $< $(MARIADB_ENVIRONS) > $@
+	test -f $@ && env $$(cat $@ | sed 's/[[:space:]]+#.*$$//' | xargs) \
+		bash $< > $@
 
 $(MARIADB_CONF_DIST_DIR)/%: $(MARIADB_CONF_DIR)/% $(MARIADB_ENV_FILE)
 	mkdir -p $(@D)
-	cat $< | bash $(FILE_GENERATOR_SCRIPT) > $@
-
-show:
-	echo $(MARIADB_DST_CONF)
+	env - $$(cat $(MARIADB_ENV_FILE) | sed 's/[[:space:]]+#.*$$//' | xargs) \
+		bash $(FILE_GENERATOR_SCRIPT) $(MARIADB_ENVIRONS) < $< > $@

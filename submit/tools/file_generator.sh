@@ -15,7 +15,7 @@ replace() {
 
 	for param in "$@"; do
 		local value="${!param}"
-		content="${content//\{\{$param\}\}/$value}"
+		content="${content//'{{'$param'}}'/$value}"
 	done
 	echo "$content"
 }
