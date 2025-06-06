@@ -19,6 +19,12 @@ main () {
 }
 
 setup_mariadbd () {
+	check_env \
+		"INIT_DB_FILE_PATH" \
+		"MARIADB_SOCKET" \
+		"MARIADB_PID_FILE" \
+		"INIT_DB_FILE_DIR" \
+		"INIT_DB_FILE_PATH"
 	echo '[ into setup_mariadbd ]'
 	setup_directory__socket
 	setup_directory__pid_file
@@ -50,6 +56,19 @@ merge_init_files() {
 	for file in $(find "$init_db_file_dir" -name "*.sql" | sort); do
 		cat "$file" >> "$init_db_file"
 		echo -e ';' >> "$init_db_file"
+	done
+}
+
+check_env() {
+	echo 'check use environment'
+	echo '✅ is having. ❌ is not having'
+	local environment="$(env)"
+	for env_name in "$@"; do
+		if echo "$environment" | grep -e "^$env_name="; then
+			echo "✅ $env_name"
+		else
+			echo "❌ $env_name"
+		fi
 	done
 }
 
