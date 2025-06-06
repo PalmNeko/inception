@@ -43,6 +43,7 @@ services:
       dockerfile: Dockerfile
       args:
         BASE_IMAGE: ${BASE_IMAGE}
+    env_file: ${MARIADB_CONTEXT}/.env
     networks:
       - backend-network
     configs:
@@ -126,11 +127,11 @@ configs:
   wordpress_php_fpm_pool_dir:
     file: ${WORDPRESS_CONTEXT}/conf/fpm/pool.d
   mariadb_mariadb_config:
-    file: ${MARIADB_CONTEXT}/conf/mysql/mariadb.cnf
+    file: ${MARIADB_CONTEXT}/dist/conf/mariadb.cnf
   mariadb_mariadb_server_config:
-    file: ${MARIADB_CONTEXT}/conf/mysql/mariadb.conf.d/50-server.cnf
+    file: ${MARIADB_CONTEXT}/dist/conf/mariadb.conf.d/50-server.cnf
   mariadb_initdb_file:
-    file: ${MARIADB_CONTEXT}/conf/mysql/init-file/wp.sql
+    file: ${MARIADB_CONTEXT}/dist/conf/init-file/wp.sql
 
 # volumes
 volumes:

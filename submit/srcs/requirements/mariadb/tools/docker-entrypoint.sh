@@ -64,7 +64,7 @@ check_env() {
 	echo '✅ is having. ❌ is not having'
 	local environment="$(env)"
 	for env_name in "$@"; do
-		if echo "$environment" | grep -e "^$env_name="; then
+		if echo "$environment" | grep -e "^$env_name=" > /dev/null; then
 			echo "✅ $env_name"
 		else
 			echo "❌ $env_name"
