@@ -82,8 +82,22 @@ install-utils:
 # init
 #
 
-# common
+# functions
 FILE_GENERATOR_SCRIPT   =  tools/file_generator.sh
+
+# Desc : command on environment is .env file environment
+# Usage: $(call on_environment,env_file,command)
+on_environment = bash -c "$$(cat $(1) \
+		| sed -E 's/[[:space:]]+\#.*$$//' \
+		| grep -vE '^[[:space:]]*\#' \
+		| sed -E 's/"/\"/' \
+		| awk -F = '{print "export " "\""$$0"\""}' \
+	)"' ; \
+	$(2) ; '
+
+# Desc : generate config file by replacement value of env_names EX: HOGE=123 {{HOGE}} -> 123
+# Usage: $(call generate_conf_file,env_names,input_file,output_file)
+generate_conf_file = bash $(FILE_GENERATOR_SCRIPT) $(1) < $(2) > $(3)
 
 # mariadb
 
@@ -108,10 +122,12 @@ mariadb-init: $(MARIADB_DST_CONF) $(MARIADB_ENV_FILE)
 
 $(MARIADB_ENV_FILE): $(MARIADB_ENV_GEN_SCRIPT)
 	mkdir -p $(@D)
-	test -f $@ && env $$(cat $@ | sed 's/[[:space:]]+#.*$$//' | xargs) \
-		bash $< > $@
+	bash $< > $@ || (rm $@ ; exit 1)
 
 $(MARIADB_CONF_DIST_DIR)/%: $(MARIADB_CONF_DIR)/% $(MARIADB_ENV_FILE)
 	mkdir -p $(@D)
-	env - $$(cat $(MARIADB_ENV_FILE) | sed 's/[[:space:]]+#.*$$//' | xargs) \
-		bash $(FILE_GENERATOR_SCRIPT) $(MARIADB_ENVIRONS) < $< > $@
+	$(call on_environment,$(MARIADB_ENV_FILE), \
+		$(call generate_conf_file,$(MARIADB_ENVIRONS),$<,$@)) 
+
+show:
+	$(call on_environment,$(MARIADB_ENV_FILE), env)
