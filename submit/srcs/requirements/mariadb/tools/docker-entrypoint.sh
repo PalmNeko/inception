@@ -1,13 +1,17 @@
 #!/bin/bash
 
+#
+# If you change this file, you have to rebuild the image.
+#
+
 main () {
 	echo '[ start mariadbd container ]'
 
 	if [ "$1" = "mariadbd" ]; then
 		setup_mariadbd
-		if [ -n "$INIT_DB_FILE" ]; then
-			merge_init_file
-			exec "$@" --init-file="$INIT_DB_FILE"
+		if [ -n "$INIT_DB_FILE_PATH" ]; then
+			merge_init_files
+			exec "$@" --init-file="$INIT_DB_FILE_PATH"
 		fi
 	fi
 	echo '[ the setup is now complete ]'
@@ -22,26 +26,24 @@ setup_mariadbd () {
 }
 
 setup_directory__socket() {
-	SOCKET_DIRECTORY='/tmp/run/mysqld'
+	local socket_directory="$(dirname ${MARIADB_SOCKET:-"/run/mysqld/mysqld.sock"})"
 	echo 'setup directory for "socket" mariadb setting'
-	mkdir -p "$SOCKET_DIRECTORY"
-	chown -R mysql:mysql "$SOCKET_DIRECTORY"
-	ls -ld "$SOCKET_DIRECTORY"
+	mkdir -p "$socket_directory"
+	chown -R mysql:mysql "$socket_directory"
+	ls -ld "$socket_directory"
 }
 
 setup_directory__pid_file() {
-	PID_FILE_DIRECTORY='/tmp/run/mysqld'
+	local pid_file_directory="$(dirname ${MARIADB_PID_FILE:-"/run/mysqld/mysqld.pid"})"
 	echo 'setup directory for "pid-file" mariadb setting'
-	mkdir -p "$PID_FILE_DIRECTORY"
-	chown -R mysql:mysql "$PID_FILE_DIRECTORY"
-	ls -ld "$PID_FILE_DIRECTORY"
+	mkdir -p "$pid_file_directory"
+	chown -R mysql:mysql "$pid_file_directory"
+	ls -ld "$pid_file_directory"
 }
 
-merge_init_file() {
-	INIT_DB_FILE_DIR=/etc/mysql/initdb.d
-	INIT_DB_FILE=/etc/mysql/initdb.sql
+merge_init_files() {
 	local init_db_file_dir="${INIT_DB_FILE_DIR:-/etc/mysql/initdb.d}"
-	local init_db_file="${INIT_DB_FILE:-/etc/mysql/initdb.sql}"
+	local init_db_file="${INIT_DB_FILE_PATH:-/etc/mysql/initdb.sql}"
 	echo 'merge init-files'
 	mkdir -p "$init_db_file_dir"
 	touch "$init_db_file"

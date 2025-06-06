@@ -74,3 +74,42 @@ install-utils:
 		less \
 		lsof \
 		procps
+
+
+#
+# init
+#
+
+# common
+FILE_GENERATOR_SCRIPT   =  tools/file_generator.sh
+
+# mariadb
+MARIADB_REQUIRE   = $(MARIADB_DST_CONF)
+
+MARIADB_CONTEXT        = srcs/requirements/mariadb
+MARIADB_ENVIRONS       = \
+	WORDPRESS_USERNAME \
+	WORDPRESS_DBNAME \
+	WORDPRESS_PASSWORD \
+	MARIADB_SOCKET \
+	MARIADB_PID_FILE \
+	INIT_DB_FILE_PATH \
+	INIT_DB_FILE_DIR
+MARIADB_ENV_FILE       = $(MARIADB_CONTEXT)/.env
+MARIADB_ENV_GEN_SCRIPT = $(MARIADB_CONTEXT)/tools/print_new_env.sh
+MARIADB_CONF_DIR       = $(MARIADB_CONTEXT)/conf/mysql
+MARIADB_CONF_DIST_DIR  = $(MARIADB_CONTEXT)/dist/conf
+
+MARIADB_CONF           = $(subst $(MARIADB_CONF_DIR)/,,$(shell find $(MARIADB_CONF_DIR) -name "*.cnf" -o -name "*.sql"))
+MARIADB_DST_CONF       = $(addprefix $(MARIADB_CONF_DIST_DIR)/,$(MARIADB_CONF))
+
+$(MARIADB_ENV_FILE): $(MARIADB_ENV_GEN_SCRIPT)
+	mkdir -p $(@D)
+	test -f $@ && . $@ ; bash $< $(MARIADB_ENVIRONS) > $@
+
+$(MARIADB_CONF_DIST_DIR)/%: $(MARIADB_CONF_DIR)/% $(MARIADB_ENV_FILE)
+	mkdir -p $(@D)
+	cat $< | bash $(FILE_GENERATOR_SCRIPT) > $@
+
+show:
+	echo $(MARIADB_DST_CONF)
