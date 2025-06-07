@@ -21,15 +21,11 @@ x-inception-internal-network: &internal-container-network
   driver: bridge
   attachable: false
   internal: true
-  enable_ipv4: true
-  enable_ipv6: false
 
 x-inception-external-network: &external-container-network
   driver: bridge
   attachable: false
   internal: false
-  enable_ipv4: true
-  enable_ipv6: false
 
 # services
 services:
