@@ -13,7 +13,7 @@ up: init
 detach: CMD_FLAGS += -d
 detach: up
 
-init: mariadb-init nginx-init
+init: mariadb-init nginx-init wordpress-init
 
 build:
 	$(COMPOSE) build
@@ -130,6 +130,32 @@ $(NGINX_CONF_DIST_DIR)/%: $(NGINX_CONF_DIR)/% $(NGINX_ENV_FILE)
 	@mkdir -p $(@D)
 	@$(call on_environment,$(NGINX_ENV_FILE), \
 		$(call generate_conf_file,$(NGINX_ENVIRONS),$<,$@)) 
+	@echo 'created $@'
+
+# wordpress
+
+WORDPRESS_CONTEXT        = srcs/requirements/wordpress
+WORDPRESS_ENVIRONS       = \
+	WORDPRESS_LISTEN
+WORDPRESS_ENV_FILE       = $(WORDPRESS_CONTEXT)/.env
+WORDPRESS_ENV_GEN_SCRIPT = $(WORDPRESS_CONTEXT)/tools/print_new_env.sh
+WORDPRESS_CONF_DIR       = $(WORDPRESS_CONTEXT)/conf
+WORDPRESS_CONF_DIST_DIR  = $(WORDPRESS_CONTEXT)/dist/conf
+
+WORDPRESS_CONF           = $(subst $(WORDPRESS_CONF_DIR)/,,$(shell find $(WORDPRESS_CONF_DIR) -type f))
+WORDPRESS_DST_CONF       = $(addprefix $(WORDPRESS_CONF_DIST_DIR)/,$(WORDPRESS_CONF))
+
+wordpress-init: $(WORDPRESS_DST_CONF) $(WORDPRESS_ENV_FILE)
+
+$(WORDPRESS_ENV_FILE): $(WORDPRESS_ENV_GEN_SCRIPT)
+	@mkdir -p $(@D)
+	@bash $< > $@ || (rm $@ ; exit 1)
+	@echo 'created $@'
+
+$(WORDPRESS_CONF_DIST_DIR)/%: $(WORDPRESS_CONF_DIR)/% $(WORDPRESS_ENV_FILE)
+	@mkdir -p $(@D)
+	@$(call on_environment,$(WORDPRESS_ENV_FILE), \
+		$(call generate_conf_file,$(WORDPRESS_ENVIRONS),$<,$@)) 
 	@echo 'created $@'
 
 # mariadb

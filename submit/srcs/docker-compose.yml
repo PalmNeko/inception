@@ -95,16 +95,11 @@ services:
       dockerfile: Dockerfile
       args:
         <<: *common-arg
+    env_file: ${WORDPRESS_CONTEXT}/.env
     networks:
       - frontend-network
       - backend-network
     configs:
-      - source: wordpress_php_fpm_config
-        target: /etc/php/7.4/fpm/php-fpm.conf
-        mode: 440
-      - source: wordpress_php_fpm_php_ini
-        target: /etc/php/7.4/fpm/php.ini
-        mode: 440
       - source: wordpress_php_fpm_pool_dir
         target: /etc/php/7.4/fpm/pool.d
         mode: 750
@@ -117,12 +112,8 @@ configs:
     file: ${NGINX_CONTEXT}/dist/conf/nginx/nginx.conf
   nginx_wordpress_config:
     file: ${NGINX_CONTEXT}/dist/conf/ssl.conf
-  wordpress_php_fpm_config:
-    file: ${WORDPRESS_CONTEXT}/conf/fpm/php-fpm.conf
-  wordpress_php_fpm_php_ini:
-    file: ${WORDPRESS_CONTEXT}/conf/fpm/php.ini
   wordpress_php_fpm_pool_dir:
-    file: ${WORDPRESS_CONTEXT}/conf/fpm/pool.d
+    file: ${WORDPRESS_CONTEXT}/dist/conf/fpm/pool.d
   mariadb_mariadb_config:
     file: ${MARIADB_CONTEXT}/dist/conf/mariadb.cnf
   mariadb_mariadb_server_config:
