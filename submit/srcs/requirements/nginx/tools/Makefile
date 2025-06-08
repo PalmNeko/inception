@@ -3,8 +3,9 @@
 # functions
 FILE_GENERATOR_SCRIPT   =  ./file_generator.sh
 
-# Desc : command on environment is .env file environment
-# Usage: $(call on_environment,env_file,command)
+# Desc : load environment from envfile
+# Param 1: environment file
+# Usage: $(call load_environment,env_file)
 load_environment = $(shell cat $(1) \
 		| sed -E 's/[[:space:]]+\#.*$$//' \
 		| grep -vE '^[[:space:]]*\#' \
