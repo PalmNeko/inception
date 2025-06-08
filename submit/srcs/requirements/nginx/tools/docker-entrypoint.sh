@@ -19,8 +19,8 @@ main() {
 }
 
 chk_nginx() {
-    local ssl_keyfile="$SSL_KEY_PATH"
-    local ssl_crtfile="$SSL_CRT_PATH"
+    local ssl_keyfile="$SSL_CRT_MOUNT_PATH"
+    local ssl_crtfile="$SSL_KEY_MOUNT_PATH"
 
     test -f "$ssl_keyfile" || errexit "$ssl_keyfile: No such file or directory - check Dockerfile in prepare stage"
     echo "$ssl_keyfile: exists"

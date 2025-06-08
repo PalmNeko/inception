@@ -81,10 +81,10 @@ services:
         target: /etc/nginx/conf.d/ssl.conf
         mode: 0440
     secrets:
-      - source: ssl_key
-        target: /ssl.key
       - source: ssl_crt
-        target: /ssl.crt
+        target: ${SSL_CRT_MOUNT_PATH:?error}
+      - source: ssl_key
+        target: ${SSL_KEY_MOUNT_PATH:?error}
     volumes:
       - wordpress-data:/srv/wordpress/
     develop:
