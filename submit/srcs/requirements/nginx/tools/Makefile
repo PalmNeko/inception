@@ -3,14 +3,9 @@
 COMPOSE_CONTEXT      = ../../../
 COMPOSE_ENV_FILE      = $(COMPOSE_CONTEXT)/.env
 NGINX_CONTEXT        = ..
-NGINX_ENVIRONS       = \
-	CGI_HOSTNAME \
-	CGI_PORT \
-	CGI_ROOT \
-	NGINX_SERVER_NAME \
-	SSL_CRT_PATH \
-	SSL_KEY_PATH
 NGINX_ENV_FILE       = $(NGINX_CONTEXT)/.env
+NGINX_ENV_FILES      = $(NGINX_ENV_FILE) $(COMPOSE_ENV_FILE)
+NGINX_ENV_NAMES       = $(call env_names, $(NGINX_ENV_FILES))
 NGINX_ENV_GEN_SCRIPT = $(NGINX_CONTEXT)/tools/print_new_env.sh
 NGINX_CONF_DIR       = $(NGINX_CONTEXT)/conf
 NGINX_CONF_DIST_DIR  = $(NGINX_CONTEXT)/dist/conf
@@ -36,7 +31,7 @@ $(NGINX_ENV_FILE): $(NGINX_ENV_GEN_SCRIPT)
 $(NGINX_CONF_DIST_DIR)/%: $(NGINX_CONF_DIR)/% $(NGINX_ENV_FILE)
 	@mkdir -p $(@D)
 	@$(call load_environment,$(COMPOSE_ENV_FILE)) $(call load_environment,$(NGINX_ENV_FILE)) \
-			$(call generate_conf_file,$(NGINX_ENVIRONS),$<,$@)
+			$(call generate_conf_file,$(NGINX_ENV_NAMES),$<,$@)
 	@echo 'created $@'
 
 # functions
@@ -58,4 +53,15 @@ define load_environment
 	| sed -E 's/"/\"/' \
 	| grep -E '=' \
 	| awk -F = '{print "export " "\""$$0"\" ;"}' )
+endef
+
+# Desc: get env names
+# Usage: $(call env_names)
+define env_names
+	$(shell \
+		$(foreach file,$(1), \
+			$(call load_environment,$(file)) \
+		) \
+		env | sed 's/=.*$$//' \
+	)
 endef
