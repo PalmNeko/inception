@@ -5,7 +5,6 @@ main () {
 	env
 	if [ "$1" = "php-fpm7.4" ]; then
 		setup_wordpress
-		for_debug_php_info
 	fi
 	echo '[ the setup is now complete ]'
 	exec "$@"

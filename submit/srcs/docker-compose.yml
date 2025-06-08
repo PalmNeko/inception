@@ -69,6 +69,7 @@ services:
       target: prod
     ports:
       - 4430:443
+    env_file: ${NGINX_CONTEXT}/.env
     networks:
       - external-network
       - frontend-network
@@ -113,9 +114,9 @@ services:
 # configs
 configs:
   nginx_config:
-    file: ./requirements/nginx/conf/nginx/nginx.conf
+    file: ${NGINX_CONTEXT}/dist/conf/nginx/nginx.conf
   nginx_wordpress_config:
-    file: ./requirements/nginx/conf/ssl.conf
+    file: ${NGINX_CONTEXT}/dist/conf/ssl.conf
   wordpress_php_fpm_config:
     file: ${WORDPRESS_CONTEXT}/conf/fpm/php-fpm.conf
   wordpress_php_fpm_php_ini:

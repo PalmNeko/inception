@@ -38,16 +38,13 @@ make_cert() {
 }
 
 chk_nginx() {
-    # import environment from .env
-    # - DOMAIN
-    DOMAIN=$DOMAIN
-    SSL_KEYFILE="/ssl/nginx.key"
-    SSL_CRTFILE="/ssl/nginx.crt"
+    local ssl_keyfile="${SSL_KEYFILE:-"/ssl/nginx.key"}"
+    local ssl_crtfile="${SSL_CRTFILE:-"/ssl/nginx.crt"}"
 
-    test -f "$SSL_KEYFILE" || errexit "$SSL_KEYFILE: No such file or directory - check Dockerfile in prepare stage"
-    echo "$SSL_KEYFILE: exists"
-    test -f "$SSL_CRTFILE" || errexit "$SSL_KEYFILE: No such file or directory - check Dockerfile in prepare stage"
-    echo "$SSL_CRTFILE: exists"
+    test -f "$ssl_keyfile" || errexit "$ssl_keyfile: No such file or directory - check Dockerfile in prepare stage"
+    echo "$ssl_keyfile: exists"
+    test -f "$ssl_crtfile" || errexit "$ssl_keyfile: No such file or directory - check Dockerfile in prepare stage"
+    echo "$ssl_crtfile: exists"
 }
 
 errexit() {
