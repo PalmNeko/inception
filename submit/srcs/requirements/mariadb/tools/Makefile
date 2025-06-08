@@ -27,12 +27,15 @@ $(MARIADB_ENV_FILE): $(MARIADB_ENV_GEN_SCRIPT)
 	@bash $< > $@ || (rm $@ ; exit 1)
 	@echo 'created $@'
 
-$(MARIADB_CONF_DIST_DIR)/%: $(MARIADB_CONF_DIR)/% $(MARIADB_ENV_FILE)
+$(MARIADB_CONF_DIST_DIR)/%: $(MARIADB_CONF_DIR)/% $(MARIADB_ENV_FILE) $(COMPOSE_ENV_FILE)
 	@mkdir -p $(@D)
 	@$(call load_environment,$(COMPOSE_ENV_FILE)) $(call load_environment,$(MARIADB_ENV_FILE)) \
 		$(call generate_conf_file,$<,$@)
 	@echo 'created $@'
 
+$(COMPOSE_ENV_FILE):
+	test -f $@ || $(error Please make .env for docker-compose.yml)
+	touch $@
 
 # functions
 

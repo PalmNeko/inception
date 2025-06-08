@@ -28,11 +28,15 @@ $(NGINX_ENV_FILE): $(NGINX_ENV_GEN_SCRIPT)
 	@bash $< > $@ || (rm $@ ; exit 1)
 	@echo 'created $@'
 
-$(NGINX_CONF_DIST_DIR)/%: $(NGINX_CONF_DIR)/% $(NGINX_ENV_FILE)
+$(NGINX_CONF_DIST_DIR)/%: $(NGINX_CONF_DIR)/% $(NGINX_ENV_FILE) $(COMPOSE_ENV_FILE)
 	@mkdir -p $(@D)
 	@$(call load_environment,$(COMPOSE_ENV_FILE)) $(call load_environment,$(NGINX_ENV_FILE)) \
 			$(call generate_conf_file,$<,$@)
 	@echo 'created $@'
+
+$(COMPOSE_ENV_FILE):
+	test -f $@ || $(error Please make .env for docker-compose.yml)
+	touch $@
 
 # functions
 

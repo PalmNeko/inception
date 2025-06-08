@@ -27,12 +27,15 @@ $(WORDPRESS_ENV_FILE): $(WORDPRESS_ENV_GEN_SCRIPT)
 	@bash $< > $@ || (rm $@ ; exit 1)
 	@echo 'created $@'
 
-$(WORDPRESS_CONF_DIST_DIR)/%: $(WORDPRESS_CONF_DIR)/% $(WORDPRESS_ENV_FILE)
+$(WORDPRESS_CONF_DIST_DIR)/%: $(WORDPRESS_CONF_DIR)/% $(WORDPRESS_ENV_FILE) $(COMPOSE_ENV_FILE)
 	@mkdir -p $(@D)
 	@$(call load_environment,$(COMPOSE_ENV_FILE)) $(call load_environment,$(WORDPRESS_ENV_FILE)) \
 		$(call generate_conf_file,$<,$@)
 	@echo 'created $@'
 
+$(COMPOSE_ENV_FILE):
+	test -f $@ || $(error Please make .env for docker-compose.yml)
+	touch $@
 
 # functions
 
