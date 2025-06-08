@@ -1,22 +1,5 @@
 
 
-# functions
-FILE_GENERATOR_SCRIPT   =  ./file_generator.sh
-
-# Desc : command on environment is .env file environment
-# Usage: $(call on_environment,env_file,command)
-on_environment = bash -c "$$(cat $(1) \
-		| sed -E 's/[[:space:]]+\#.*$$//' \
-		| grep -vE '^[[:space:]]*\#' \
-		| sed -E 's/"/\"/' \
-		| awk -F = '{print "export " "\""$$0"\""}' \
-	)"' ; \
-	$(2) ; '
-
-# Desc : generate config file by replacement value of env_names EX: HOGE=123 {{HOGE}} -> 123
-# Usage: $(call generate_conf_file,env_names,input_file,output_file)
-generate_conf_file = bash $(FILE_GENERATOR_SCRIPT) $(1) < $(2) > $(3)
-
 # wordpress
 
 WORDPRESS_CONTEXT        = ..
@@ -47,6 +30,28 @@ $(WORDPRESS_ENV_FILE): $(WORDPRESS_ENV_GEN_SCRIPT)
 
 $(WORDPRESS_CONF_DIST_DIR)/%: $(WORDPRESS_CONF_DIR)/% $(WORDPRESS_ENV_FILE)
 	@mkdir -p $(@D)
-	@$(call on_environment,$(WORDPRESS_ENV_FILE), \
-		$(call generate_conf_file,$(WORDPRESS_ENVIRONS),$<,$@)) 
+	@$(call load_environment,$(WORDPRESS_ENV_FILE)) \
+		$(call generate_conf_file,$(WORDPRESS_ENVIRONS),$<,$@)
 	@echo 'created $@'
+
+
+# functions
+
+# Desc : generate config file by replacement value of env_names EX: HOGE=123 {{HOGE}} -> 123
+# Usage: $(call generate_conf_file,env_names,input_file,output_file)
+FILE_GENERATOR_SCRIPT   =  ./file_generator.sh
+define generate_conf_file
+	bash $(FILE_GENERATOR_SCRIPT) $(1) < $(2) > $(3)
+endef
+
+# Desc : load environment from envfile
+# Param 1: environment file
+# Usage: $(call load_environment,env_file)
+define load_environment
+	$(shell cat $(1) \
+	| sed -E 's/[[:space:]]+\#.*$$//' \
+	| grep -vE '^[[:space:]]*\#' \
+	| sed -E 's/"/\"/' \
+	| grep -E '=' \
+	| awk -F = '{print "export " "\""$$0"\" ;"}' )
+endef

@@ -1,22 +1,5 @@
 
 
-# functions
-FILE_GENERATOR_SCRIPT   =  ./file_generator.sh
-
-# Desc : command on environment is .env file environment
-# Usage: $(call on_environment,env_file,command)
-on_environment = bash -c "$$(cat $(1) \
-		| sed -E 's/[[:space:]]+\#.*$$//' \
-		| grep -vE '^[[:space:]]*\#' \
-		| sed -E 's/"/\"/' \
-		| awk -F = '{print "export " "\""$$0"\""}' \
-	)"' ; \
-	$(2) ; '
-
-# Desc : generate config file by replacement value of env_names EX: HOGE=123 {{HOGE}} -> 123
-# Usage: $(call generate_conf_file,env_names,input_file,output_file)
-generate_conf_file = bash $(FILE_GENERATOR_SCRIPT) $(1) < $(2) > $(3)
-
 # mariadb
 
 MARIADB_CONTEXT        = ..
@@ -53,6 +36,28 @@ $(MARIADB_ENV_FILE): $(MARIADB_ENV_GEN_SCRIPT)
 
 $(MARIADB_CONF_DIST_DIR)/%: $(MARIADB_CONF_DIR)/% $(MARIADB_ENV_FILE)
 	@mkdir -p $(@D)
-	@$(call on_environment,$(MARIADB_ENV_FILE), \
-		$(call generate_conf_file,$(MARIADB_ENVIRONS),$<,$@)) 
+	@$(call load_environment,$(MARIADB_ENV_FILE)) \
+		$(call generate_conf_file,$(MARIADB_ENVIRONS),$<,$@)
 	@echo 'created $@'
+
+
+# functions
+
+# Desc : generate config file by replacement value of env_names EX: HOGE=123 {{HOGE}} -> 123
+# Usage: $(call generate_conf_file,env_names,input_file,output_file)
+FILE_GENERATOR_SCRIPT   =  ./file_generator.sh
+define generate_conf_file
+	bash $(FILE_GENERATOR_SCRIPT) $(1) < $(2) > $(3)
+endef
+
+# Desc : load environment from envfile
+# Param 1: environment file
+# Usage: $(call load_environment,env_file)
+define load_environment
+	$(shell cat $(1) \
+	| sed -E 's/[[:space:]]+\#.*$$//' \
+	| grep -vE '^[[:space:]]*\#' \
+	| sed -E 's/"/\"/' \
+	| grep -E '=' \
+	| awk -F = '{print "export " "\""$$0"\" ;"}' )
+endef
