@@ -12,8 +12,6 @@ load_environment = $(shell cat $(1) \
 		| grep -E '=' \
 		| awk -F = '{print "export " "\""$$0"\" ;"}' )
 
-on_environment = $(call export_environment,$(1)) $(2)
-
 # Desc : generate config file by replacement value of env_names EX: HOGE=123 {{HOGE}} -> 123
 # Usage: $(call generate_conf_file,env_names,input_file,output_file)
 generate_conf_file = bash $(FILE_GENERATOR_SCRIPT) $(1) < $(2) > $(3)
