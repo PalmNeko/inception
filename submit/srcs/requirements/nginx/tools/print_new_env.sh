@@ -11,6 +11,8 @@ set_environment() {
 	configs["CGI_PORT"]="$(prompt_for_environment "cgi port number: ( CGI_PORT )" "$CGI_PORT" "9000")" ; validate_required "CGI_PORT"
 	configs["CGI_ROOT"]="$(prompt_for_environment "cgi root directory: ( CGI_ROOT )" "$CGI_ROOT" "/srv/wordpress")" ; validate_required "CGI_ROOT"
 	configs["NGINX_SERVER_NAME"]="$(prompt_for_environment "nginx server_name: ( NGINX_SERVER_NAME )" "$NGINX_SERVER_NAME" "tookuyam.42.fr")" ; validate_required "NGINX_SERVER_NAME"
+	configs["SSL_KEY_PATH"]="$(prompt_for_environment "ssl key mount path: ( SSL_KEY_PATH )" "$SSL_KEY_PATH" "/ssl.key")" ; validate_required "SSL_KEY_PATH"
+	configs["SSL_CRT_PATH"]="$(prompt_for_environment "ssl crt mount path: ( SSL_CRT_PATH )" "$SSL_CRT_PATH" "/ssl.crt")" ; validate_required "SSL_CRT_PATH"
 }
 
 # Usage: $0

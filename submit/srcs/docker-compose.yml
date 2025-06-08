@@ -80,6 +80,11 @@ services:
       - source: nginx_wordpress_config
         target: /etc/nginx/conf.d/ssl.conf
         mode: 0440
+    secrets:
+      - source: ssl_key
+        target: /ssl.key
+      - source: ssl_crt
+        target: /ssl.crt
     volumes:
       - wordpress-data:/srv/wordpress/
     develop:
@@ -120,6 +125,12 @@ configs:
     file: ${MARIADB_CONTEXT}/dist/conf/mysql/mariadb.conf.d/50-server.cnf
   mariadb_initdb_file:
     file: ${MARIADB_CONTEXT}/dist/conf/mysql/init-file/wp.sql
+
+secrets:
+  ssl_key:
+    file: ${SECRETS_CONTEXT}/nginx/ssl.key
+  ssl_crt:
+    file: ${SECRETS_CONTEXT}/nginx/ssl.crt
 
 # volumes
 volumes:

@@ -1,4 +1,10 @@
 
+# conf
+DOMAIN    =   tookuyam.42.fr
+ENV_FILE  =   srcs/.env
+
+# main
+
 ifeq ($(shell docker buildx bake print | grep -o "ERROR"),ERROR)
 	COMPOSE_ENV = COMPOSE_BAKE=true
 endif
@@ -13,7 +19,7 @@ up: init
 detach: CMD_FLAGS += -d
 detach: up
 
-init: mariadb-init nginx-init wordpress-init
+init: secrets mariadb-init nginx-init wordpress-init
 
 build:
 	$(COMPOSE) build
@@ -99,11 +105,6 @@ fclean:
 	$(MAKE) -C $(WORDPRESS_TOOL_CONTEXT) fclean
 	$(MAKE) -C $(MARIDB_TOOL_CONTEXT) fclean
 
-re:
-	$(MAKE) -C $(NGINX_TOOL_CONTEXT) re
-	$(MAKE) -C $(WORDPRESS_TOOL_CONTEXT) re
-	$(MAKE) -C $(MARIDB_TOOL_CONTEXT) re
-
 nginx-init:
 	bash -c "$(MAKE) -C $(NGINX_TOOL_CONTEXT)"
 
@@ -112,3 +113,24 @@ wordpress-init:
 
 mariadb-init:
 	bash -c "$(MAKE) -C $(MARIDB_TOOL_CONTEXT)"
+
+#
+# secrets
+#
+
+ifndef DOMAIN
+	$(error DOMAIN is not set.)
+endif
+
+SECRETS_DIR      = secrets
+NGINX_SECRET_KEY = $(SECRETS_DIR)/nginx/ssl.key
+NGINX_SECRET_CRT = $(SECRETS_DIR)/nginx/ssl.crt
+
+.PHONY: secrets
+secrets: $(NGINX_SECRET_KEY) $(NGINX_SECRET_CRT)
+
+$(NGINX_SECRET_KEY) $(NGINX_SECRET_CRT):
+	mkdir -p $(@D)
+	. $(ENV_FILE) ; openssl req -x509 -nodes -days 15 -newkey rsa:2048 \
+		-keyout "$(NGINX_SECRET_KEY)" -out "$(NGINX_SECRET_CRT)" \
+		-subj "/CN=$(DOMAIN)"

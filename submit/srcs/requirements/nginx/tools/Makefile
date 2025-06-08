@@ -5,25 +5,30 @@ FILE_GENERATOR_SCRIPT   =  ./file_generator.sh
 
 # Desc : command on environment is .env file environment
 # Usage: $(call on_environment,env_file,command)
-on_environment = bash -c "$$(cat $(1) \
+load_environment = $(shell cat $(1) \
 		| sed -E 's/[[:space:]]+\#.*$$//' \
 		| grep -vE '^[[:space:]]*\#' \
 		| sed -E 's/"/\"/' \
-		| awk -F = '{print "export " "\""$$0"\""}' \
-	)"' ; \
-	$(2) ; '
+		| grep -E '=' \
+		| awk -F = '{print "export " "\""$$0"\" ;"}' )
+
+on_environment = $(call export_environment,$(1)) $(2)
 
 # Desc : generate config file by replacement value of env_names EX: HOGE=123 {{HOGE}} -> 123
 # Usage: $(call generate_conf_file,env_names,input_file,output_file)
 generate_conf_file = bash $(FILE_GENERATOR_SCRIPT) $(1) < $(2) > $(3)
 
 # nginx
+COMPOSE_CONTEXT      = ../../../
+COMPOSE_ENV_FILE      = $(COMPOSE_CONTEXT)/.env
 NGINX_CONTEXT        = ..
 NGINX_ENVIRONS       = \
 	CGI_HOSTNAME \
 	CGI_PORT \
 	CGI_ROOT \
-	NGINX_SERVER_NAME
+	NGINX_SERVER_NAME \
+	SSL_CRT_PATH \
+	SSL_KEY_PATH
 NGINX_ENV_FILE       = $(NGINX_CONTEXT)/.env
 NGINX_ENV_GEN_SCRIPT = $(NGINX_CONTEXT)/tools/print_new_env.sh
 NGINX_CONF_DIR       = $(NGINX_CONTEXT)/conf
@@ -49,6 +54,6 @@ $(NGINX_ENV_FILE): $(NGINX_ENV_GEN_SCRIPT)
 
 $(NGINX_CONF_DIST_DIR)/%: $(NGINX_CONF_DIR)/% $(NGINX_ENV_FILE)
 	@mkdir -p $(@D)
-	@$(call on_environment,$(NGINX_ENV_FILE), \
-		$(call generate_conf_file,$(NGINX_ENVIRONS),$<,$@)) 
+	@$(call load_environment,$(COMPOSE_ENV_FILE)) $(call load_environment,$(NGINX_ENV_FILE)) \
+			$(call generate_conf_file,$(NGINX_ENVIRONS),$<,$@)
 	@echo 'created $@'
