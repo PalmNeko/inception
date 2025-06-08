@@ -85,30 +85,30 @@ install-utils:
 # init
 #
 
-NGINX_CONTEXT        = srcs/requirements/nginx
-WORDPRESS_CONTEXT    = srcs/requirements/wordpress
-MARIDB_CONTEXT       = srcs/requirements/mariadb
+NGINX_TOOL_CONTEXT        = srcs/requirements/nginx/tools
+WORDPRESS_TOOL_CONTEXT    = srcs/requirements/wordpress/tools
+MARIDB_TOOL_CONTEXT       = srcs/requirements/mariadb/tools
 
 clean:
-	make -C $(NGINX_CONTEXT) clean
-	make -C $(WORDPRESS_CONTEXT) clean
-	make -C $(MARIDB_CONTEXT) clean
+	$(MAKE) -C $(NGINX_TOOL_CONTEXT) clean
+	$(MAKE) -C $(WORDPRESS_TOOL_CONTEXT) clean
+	$(MAKE) -C $(MARIDB_TOOL_CONTEXT) clean
 
 fclean:
-	make -C $(NGINX_CONTEXT) fclean
-	make -C $(WORDPRESS_CONTEXT) fclean
-	make -C $(MARIDB_CONTEXT) fclean
+	$(MAKE) -C $(NGINX_TOOL_CONTEXT) fclean
+	$(MAKE) -C $(WORDPRESS_TOOL_CONTEXT) fclean
+	$(MAKE) -C $(MARIDB_TOOL_CONTEXT) fclean
 
 re:
-	make -C $(NGINX_CONTEXT) re
-	make -C $(WORDPRESS_CONTEXT) re
-	make -C $(MARIDB_CONTEXT) re
+	$(MAKE) -C $(NGINX_TOOL_CONTEXT) re
+	$(MAKE) -C $(WORDPRESS_TOOL_CONTEXT) re
+	$(MAKE) -C $(MARIDB_TOOL_CONTEXT) re
 
 nginx-init:
-	make -C $(NGINX_CONTEXT)/tools
+	bash -c "$(MAKE) -C $(NGINX_TOOL_CONTEXT)"
 
 wordpress-init:
-	make -C $(WORDPRESS_CONTEXT)/tools
+	bash -c "$(MAKE) -C $(WORDPRESS_TOOL_CONTEXT)"
 
 mariadb-init:
-	make -C $(MARIDB_CONTEXT)/tools
+	bash -c "$(MAKE) -C $(MARIDB_TOOL_CONTEXT)"
