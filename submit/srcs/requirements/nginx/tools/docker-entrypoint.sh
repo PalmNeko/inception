@@ -19,6 +19,10 @@ main() {
 }
 
 chk_nginx() {
+    check_env \
+		"SSL_CRT_MOUNT_PATH" \
+		"SSL_KEY_MOUNT_PATH"
+
     local ssl_keyfile="$SSL_CRT_MOUNT_PATH"
     local ssl_crtfile="$SSL_KEY_MOUNT_PATH"
 
@@ -31,6 +35,19 @@ chk_nginx() {
 errexit() {
     echo "$@" > /dev/stderr
     exit 1
+}
+
+check_env() {
+	echo 'check use environment'
+	echo '✅ is having. ❌ is not having'
+	local environment="$(env)"
+	for env_name in "$@"; do
+		if echo "$environment" | grep -e "^$env_name=" > /dev/null; then
+			echo "✅ $env_name"
+		else
+			echo "❌ $env_name"
+		fi
+	done
 }
 
 main "$@"

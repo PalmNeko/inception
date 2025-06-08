@@ -24,11 +24,16 @@ setup_mariadbd () {
 		"MARIADB_SOCKET" \
 		"MARIADB_PID_FILE" \
 		"INIT_DB_FILE_DIR" \
-		"INIT_DB_FILE_PATH"
+		"INIT_DB_FILE_PATH" \
+		"ROOT_PASS_FILE"
 	echo '[ into setup_mariadbd ]'
 	setup_directory__socket
 	setup_directory__pid_file
+	setup_database
 	echo '[ out of setup_mariadbd ]'
+	echo '[ execute sql ]'
+	execute_sql_instructions
+	echo '[ executed sql ]'
 }
 
 setup_directory__socket() {
@@ -57,6 +62,65 @@ merge_init_files() {
 		cat "$file" >> "$init_db_file"
 		echo -e ';' >> "$init_db_file"
 	done
+}
+
+setup_database() {
+	setup_root_password
+}
+
+setup_root_password() {
+	if [ -z "$ROOT_PASS_FILE" ]; then
+		echo 'Error: You must set environment: ROOT_PASS_FILE' > /dev/stderr
+	fi
+	append_instruction "ALTER USER 'root'@'localhost' IDENTIFIED VIA mysql_native_password USING PASSWORD('$(cat $ROOT_PASS_FILE | tr -d '\n')');"
+}
+
+append_instruction() {
+	INSTRUCTION="$INSTRUCTION$(echo "$1")"
+}
+
+get_instructions() {
+	echo "$INSTRUCTION"
+}
+
+execute_sql_instructions() {
+	start_temporary_server
+	wait_temporary_until_initialize
+	mariadb -u root -h localhost -e "$(get_instructions)"
+	echo ""
+	echo "$get_instructions"
+	echo ""
+	stop_temporary_server
+}
+
+start_temporary_server() {
+	mariadbd &
+	declare -g MARIADB_PID
+	MARIADB_PID=$!
+}
+
+stop_temporary_server() {
+	kill "$MARIADB_PID"
+	wait "$MARIADB_PID"
+}
+
+wait_temporary_until_initialize() {
+	for i in {30..0}; do
+		if check_temporary_server_initialized; then
+			break
+		fi
+		sleep 1
+	done
+	if [ "$i" -eq 0 ]; then
+		echo "Don't start temporary server"
+		exit 1
+	fi
+}
+
+check_temporary_server_initialized() {
+	if ! mariadb --database=mysql -e 'SELECT 1;' &> /dev/null; then
+		cat $ROOT_PASS_FILE | tr -d '\n' | mariadb --database=mysql -p -e 'SELECT 1;' &> /dev/null
+	fi
 }
 
 check_env() {
