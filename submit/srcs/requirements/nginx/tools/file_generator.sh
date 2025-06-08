@@ -13,7 +13,7 @@ main() {
 replace() {
 	local content="$(cat)"
 
-	for param in "$@"; do
+	for param in $(env | sed 's/=.*//'); do
 		local value="${!param}"
 		content="${content//'{{'$param'}}'/$value}"
 	done
