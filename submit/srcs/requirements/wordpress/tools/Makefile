@@ -1,6 +1,7 @@
 
-
 # wordpress
+COMPOSE_CONTEXT      = ../../../
+COMPOSE_ENV_FILE      = $(COMPOSE_CONTEXT)/.env
 
 WORDPRESS_CONTEXT        = ..
 WORDPRESS_ENV_FILE       = $(WORDPRESS_CONTEXT)/.env
@@ -28,7 +29,7 @@ $(WORDPRESS_ENV_FILE): $(WORDPRESS_ENV_GEN_SCRIPT)
 
 $(WORDPRESS_CONF_DIST_DIR)/%: $(WORDPRESS_CONF_DIR)/% $(WORDPRESS_ENV_FILE)
 	@mkdir -p $(@D)
-	@$(call load_environment,$(WORDPRESS_ENV_FILE)) \
+	@$(call load_environment,$(COMPOSE_ENV_FILE)) $(call load_environment,$(WORDPRESS_ENV_FILE)) \
 		$(call generate_conf_file,$<,$@)
 	@echo 'created $@'
 

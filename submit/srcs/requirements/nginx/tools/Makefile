@@ -2,6 +2,7 @@
 # nginx
 COMPOSE_CONTEXT      = ../../../
 COMPOSE_ENV_FILE      = $(COMPOSE_CONTEXT)/.env
+
 NGINX_CONTEXT        = ..
 NGINX_ENV_FILE       = $(NGINX_CONTEXT)/.env
 NGINX_ENV_FILES      = $(NGINX_ENV_FILE) $(COMPOSE_ENV_FILE)

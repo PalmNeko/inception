@@ -1,6 +1,7 @@
 
-
 # mariadb
+COMPOSE_CONTEXT      = ../../../
+COMPOSE_ENV_FILE      = $(COMPOSE_CONTEXT)/.env
 
 MARIADB_CONTEXT        = ..
 MARIADB_ENV_FILE       = $(MARIADB_CONTEXT)/.env
@@ -28,7 +29,7 @@ $(MARIADB_ENV_FILE): $(MARIADB_ENV_GEN_SCRIPT)
 
 $(MARIADB_CONF_DIST_DIR)/%: $(MARIADB_CONF_DIR)/% $(MARIADB_ENV_FILE)
 	@mkdir -p $(@D)
-	@$(call load_environment,$(MARIADB_ENV_FILE)) \
+	@$(call load_environment,$(COMPOSE_ENV_FILE)) $(call load_environment,$(MARIADB_ENV_FILE)) \
 		$(call generate_conf_file,$<,$@)
 	@echo 'created $@'
 
