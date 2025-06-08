@@ -70,6 +70,9 @@ services:
     ports:
       - 4430:443
     env_file: ${NGINX_CONTEXT}/.env
+    environment:
+      SSL_CRT_MOUNT_PATH: ${SSL_CRT_MOUNT_PATH}
+      SSL_KEY_MOUNT_PATH: ${SSL_KEY_MOUNT_PATH}
     networks:
       - external-network
       - frontend-network
