@@ -54,13 +54,10 @@ services:
     configs:
       - source: mariadb_mariadb_config
         target: /etc/mysql/mariadb.cnf
-        mode: 0440
       - source: mariadb_mariadb_server_config
         target: /etc/mysql/mariadb.conf.d/50-server.cnf
-        mode: 0440
       - source: mariadb_initdb_file
         target: /etc/mysql/init-file/wp.sql
-        mode: 0440
     secrets:
       - source: db_root_password
         target: ${ROOT_PASS_FILE}
@@ -93,10 +90,8 @@ services:
     configs:
       - source: nginx_config
         target: /etc/nginx/nginx.conf
-        mode: 0440
       - source: nginx_wordpress_config
         target: /etc/nginx/conf.d/ssl.conf
-        mode: 0440
     secrets:
       - source: ssl_crt
         target: ${SSL_CRT_MOUNT_PATH:?error}
@@ -124,7 +119,6 @@ services:
     configs:
       - source: wordpress_php_fpm_pool_dir
         target: /etc/php/7.4/fpm/pool.d
-        mode: 750
     volumes:
       - wordpress-data:/srv/wordpress/
 
