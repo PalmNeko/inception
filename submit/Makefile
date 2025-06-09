@@ -5,27 +5,28 @@ ENV_FILE  =   srcs/.env
 
 # main
 
-ifeq ($(shell docker buildx bake print | grep -o "ERROR"),ERROR)
-	COMPOSE_ENV = COMPOSE_BAKE=true
-endif
+COMPOSE  = docker compose -f srcs/docker-compose.yml
 
-COMPOSE  = $(COMPOSE_ENV) docker compose -f srcs/docker-compose.yml
+
+can_use_compose_bake_environ = $(shell $(COMPOSE) build --dry-run 2> /dev/stdout | grep -o "COMPOSE_BAKE=true" > /dev/null && echo -n true || echo -n false)
+
+ifeq ($(call can_use_compose_bake_environ),true)
+	COMPOSE_ENV += COMPOSE_BAKE=true
+endif
 
 up: init
 	mkdir -p ${HOME}/data/wordpress-core
 	mkdir -p ${HOME}/data/mariadbd-data
-	$(COMPOSE) up $(CMD_FLAGS) $(service)
+	$(COMPOSE_ENV) $(COMPOSE) $@ $(CMD_FLAGS) $(service)
 
 detach: CMD_FLAGS += -d
 detach: up
 
 init: secrets mariadb-init nginx-init wordpress-init
 
-build:
-	$(COMPOSE) build
-
-stats restart down:
-	$(COMPOSE) $@ $(CMD_FLAGS) $(service)
+logs: CMD_FLAGS += -f
+stats restart down watch build logs:
+	$(COMPOSE_ENV) $(COMPOSE) $@ $(CMD_FLAGS) $(service)
 
 clean-volumes:
 	docker run --mount type=bind,source=$(HOME)/data,target=/data --rm alpine sh -c "rm -rf /data/*"
