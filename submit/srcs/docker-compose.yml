@@ -16,6 +16,13 @@ x-nginx-develop: &nginx-dev
     - path: ${NGINX_CONTEXT}/
       action: rebuild
 
+x-mariadb-develop: &mariadb-dev
+  watch:
+    - path: ${MARIADB_CONTEXT}/tools/docker-entrypoint.sh
+      action: rebuild
+    - path: ${MARIADB_CONTEXT}/conf
+      action: restart
+
 # network settings
 x-inception-internal-network: &internal-container-network
   driver: bridge
@@ -59,6 +66,8 @@ services:
         target: ${ROOT_PASS_FILE}
     volumes:
       - mariadbd-data:/var/lib/mysql
+    develop:
+      <<: *mariadb-dev
 
   nginx:
     container_name: nginx
