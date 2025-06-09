@@ -39,12 +39,17 @@
  * [mariadbd-options (server option group)](https://mariadb.com/kb/en/mariadbd-options/)
  * [configuring-mariadb-with-option-files](https://mariadb.com/kb/en/configuring-mariadb-with-option-files/)
  * [account-management-sql-commands](https://mariadb.com/kb/en/account-management-sql-commands/)
+ * [mariadb client options](https://mariadb.com/kb/en/mariadb-command-line-client/)
 
  ## [SQL statement](https://mariadb.com/kb/en/sql-statements/)
  * [create user](https://mariadb.com/kb/en/create-user/)
  * [grant](https://mariadb.com/kb/en/grant/)
  * [flush](https://mariadb.com/kb/en/flush/)
  * [create database](https://mariadb.com/kb/en/create-database/)
+
+ ## Authenticate plugin
+ * [mysql_native_password](https://mariadb.com/kb/en/authentication-plugin-mysql_native_password/) Not recommended
+ * [ed25519](https://mariadb.com/kb/en/authentication-plugin-ed25519/) recommended
 
  # Wordpress (php-fpm)
 

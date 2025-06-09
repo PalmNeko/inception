@@ -52,6 +52,10 @@ setup_directory__pid_file() {
 	ls -ld "$pid_file_directory"
 }
 
+sql_install_ed25519() {
+	append_instruction "INSTALL SONAME 'auth_ed25519';"
+}
+
 merge_init_files() {
 	local init_db_file_dir="${INIT_DB_FILE_DIR:-/etc/mysql/initdb.d}"
 	local init_db_file="${INIT_DB_FILE_PATH:-/etc/mysql/initdb.sql}"
@@ -65,18 +69,36 @@ merge_init_files() {
 }
 
 setup_database() {
+	sql_install_ed25519
 	setup_root_password
 }
 
 setup_root_password() {
 	if [ -z "$ROOT_PASS_FILE" ]; then
 		echo 'Error: You must set environment: ROOT_PASS_FILE' > /dev/stderr
+		exit 1
+	elif ! [ -f "$ROOT_PASS_FILE" ]; then
+		echo "Error: $ROOT_PASS_FILE: No such file or directory" > /dev/stderr
+		exit 1
 	fi
-	append_instruction "ALTER USER 'root'@'localhost' IDENTIFIED VIA mysql_native_password USING PASSWORD('$(cat $ROOT_PASS_FILE | tr -d '\n')');"
+	setup_password "root" "localhost" "$(cat_password $ROOT_PASS_FILE)"
+}
+
+setup_password() {
+	local user="$1" host="$2" password="$3"
+	append_instruction "ALTER USER '$user'@'$host' IDENTIFIED VIA ed25519 USING PASSWORD('$password');"
 }
 
 append_instruction() {
-	INSTRUCTION="$INSTRUCTION$(echo "$1")"
+	local sql="$1"
+	INSTRUCTION="$INSTRUCTION
+${sql}"
+}
+
+push_instruction() {
+	local sql="$1"
+	INSTRUCTION="${sql}
+$INSTRUCTION"
 }
 
 get_instructions() {
@@ -84,27 +106,39 @@ get_instructions() {
 }
 
 execute_sql_instructions() {
+	local mariadb_pid;
+	push_instruction "FLUSH PRIVILEGES;"
 	start_temporary_server
-	wait_temporary_until_initialize
+	mariadb_pid="$MARIADB_PID"
+	wait_temporary_until_initialize "$mariadb_pid"
+	
+	echo "SQL:"
+	echo "$(get_instructions)"
+	echo ""
+	
 	mariadb -u root -h localhost -e "$(get_instructions)"
-	echo ""
-	echo "$get_instructions"
-	echo ""
-	stop_temporary_server
+	stop_temporary_server "$mariadb_pid"
 }
 
 start_temporary_server() {
-	mariadbd &
+	mariadbd --skip-grant-tables &
+	echo "$!"
 	declare -g MARIADB_PID
 	MARIADB_PID=$!
 }
 
 stop_temporary_server() {
-	kill "$MARIADB_PID"
-	wait "$MARIADB_PID"
+	local mariadb_pid="$1";
+	kill "$mariadb_pid"
+	wait "$mariadb_pid"
+}
+
+cat_password() {
+	cat $1 | tr -d '\n'
 }
 
 wait_temporary_until_initialize() {
+	echo 'Waiting...'
 	for i in {30..0}; do
 		if check_temporary_server_initialized; then
 			break
@@ -115,12 +149,11 @@ wait_temporary_until_initialize() {
 		echo "Don't start temporary server"
 		exit 1
 	fi
+	echo 'Temporary server is begun'
 }
 
 check_temporary_server_initialized() {
-	if ! mariadb --database=mysql -e 'SELECT 1;' &> /dev/null; then
-		cat $ROOT_PASS_FILE | tr -d '\n' | mariadb --database=mysql -p -e 'SELECT 1;' &> /dev/null
-	fi
+	mariadb -e 'SELECT 1;' &> /dev/null;
 }
 
 check_env() {
