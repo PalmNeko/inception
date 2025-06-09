@@ -18,6 +18,8 @@ main () {
 	exec "$@"
 }
 
+##### logics #####
+
 setup_mariadbd () {
 	check_env \
 		"INIT_DB_FILE_PATH" \
@@ -31,10 +33,32 @@ setup_mariadbd () {
 	setup_directory__pid_file
 	setup_database
 	echo '[ out of setup_mariadbd ]'
-	echo '[ execute sql ]'
-	execute_sql_instructions
-	echo '[ executed sql ]'
 }
+
+setup_database() {
+	local sql
+
+	sql+=$(flush_privileges)$(echo)
+	sql+=$(sql_install_ed25519)$(echo)
+	sql+=$(setup_root_password)$(echo)
+
+	execute_sql_at_temporary_server "$sql"
+}
+
+##### SQL logics #####
+
+setup_root_password() {
+	if [ -z "$ROOT_PASS_FILE" ]; then
+		echo 'Error: You must set environment: ROOT_PASS_FILE' > /dev/stderr
+		exit 1
+	elif ! [ -f "$ROOT_PASS_FILE" ]; then
+		echo "Error: $ROOT_PASS_FILE: No such file or directory" > /dev/stderr
+		exit 1
+	fi
+	setup_password "root" "localhost" "$(cat_password $ROOT_PASS_FILE)"
+}
+
+##### setup run directory (pid and socket)  #####
 
 setup_directory__socket() {
 	local socket_directory="$(dirname ${MARIADB_SOCKET:-"/run/mysqld/mysqld.sock"})"
@@ -52,9 +76,7 @@ setup_directory__pid_file() {
 	ls -ld "$pid_file_directory"
 }
 
-sql_install_ed25519() {
-	append_instruction "INSTALL SONAME 'auth_ed25519';"
-}
+##### Config Files #####
 
 merge_init_files() {
 	local init_db_file_dir="${INIT_DB_FILE_DIR:-/etc/mysql/initdb.d}"
@@ -68,53 +90,18 @@ merge_init_files() {
 	done
 }
 
-setup_database() {
-	sql_install_ed25519
-	setup_root_password
-}
+##### Mariadb Server #####
 
-setup_root_password() {
-	if [ -z "$ROOT_PASS_FILE" ]; then
-		echo 'Error: You must set environment: ROOT_PASS_FILE' > /dev/stderr
-		exit 1
-	elif ! [ -f "$ROOT_PASS_FILE" ]; then
-		echo "Error: $ROOT_PASS_FILE: No such file or directory" > /dev/stderr
-		exit 1
-	fi
-	setup_password "root" "localhost" "$(cat_password $ROOT_PASS_FILE)"
-}
-
-setup_password() {
-	local user="$1" host="$2" password="$3"
-	append_instruction "ALTER USER '$user'@'$host' IDENTIFIED VIA ed25519 USING PASSWORD('$password');"
-}
-
-append_instruction() {
+execute_sql_at_temporary_server() {
 	local sql="$1"
-	INSTRUCTION="$INSTRUCTION
-${sql}"
-}
 
-push_instruction() {
-	local sql="$1"
-	INSTRUCTION="${sql}
-$INSTRUCTION"
-}
-
-get_instructions() {
-	echo "$INSTRUCTION"
-}
-
-execute_sql_instructions() {
 	local mariadb_pid;
-	push_instruction "FLUSH PRIVILEGES;"
-	start_temporary_server
+	start_temporary_server 
 	mariadb_pid="$MARIADB_PID"
 	wait_temporary_until_initialize "$mariadb_pid"
 	
 	echo "SQL:"
-	echo "$(get_instructions)"
-	echo ""
+	echo "$sql"
 	
 	mariadb -u root -h localhost -e "$(get_instructions)"
 	stop_temporary_server "$mariadb_pid"
@@ -131,10 +118,6 @@ stop_temporary_server() {
 	local mariadb_pid="$1";
 	kill "$mariadb_pid"
 	wait "$mariadb_pid"
-}
-
-cat_password() {
-	cat $1 | tr -d '\n'
 }
 
 wait_temporary_until_initialize() {
@@ -156,6 +139,45 @@ check_temporary_server_initialized() {
 	mariadb -e 'SELECT 1;' &> /dev/null;
 }
 
+##### SQL wrappers #####
+
+setup_password() {
+	local user="$1" host="$2" password="$3"
+	echo "ALTER USER '$user'@'$host' IDENTIFIED VIA ed25519 USING PASSWORD('$password');"
+}
+
+sql_install_ed25519() {
+	echo "INSTALL SONAME 'auth_ed25519';"
+}
+
+flush_privileges() {
+	echo "FLUSH PRIVILEGES;"
+}
+
+##### SQL Instruction Buffer #####
+
+append_instruction() {
+	local sql="$1"
+	INSTRUCTION="$INSTRUCTION
+${sql}"
+}
+
+push_instruction() {
+	local sql="$1"
+	INSTRUCTION="${sql}
+$INSTRUCTION"
+}
+
+get_instructions() {
+	echo "$INSTRUCTION"
+}
+
+##### Others (not recommended) #####
+
+cat_password() {
+	cat $1 | tr -d '\n'
+}
+
 check_env() {
 	echo 'check use environment'
 	echo '✅ is having. ❌ is not having'
@@ -168,5 +190,7 @@ check_env() {
 		fi
 	done
 }
+
+##### MAIN #####
 
 main "$@"
