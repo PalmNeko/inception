@@ -56,8 +56,6 @@ services:
         target: /etc/mysql/mariadb.cnf
       - source: mariadb_mariadb_server_config
         target: /etc/mysql/mariadb.conf.d/50-server.cnf
-      - source: mariadb_initdb_file
-        target: /etc/mysql/init-file/wp.sql
     secrets:
       - source: db_root_password
         target: ${ROOT_PASS_FILE}
@@ -134,8 +132,6 @@ configs:
     file: ${MARIADB_CONTEXT}/dist/conf/mysql/mariadb.cnf
   mariadb_mariadb_server_config:
     file: ${MARIADB_CONTEXT}/dist/conf/mysql/mariadb.conf.d/50-server.cnf
-  mariadb_initdb_file:
-    file: ${MARIADB_CONTEXT}/dist/conf/mysql/init-file/wp.sql
 
 secrets:
   ssl_key:

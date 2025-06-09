@@ -9,10 +9,6 @@ main () {
 
 	if [ "$1" = "mariadbd" ]; then
 		setup_mariadbd
-		if [ -n "$INIT_DB_FILE_PATH" ]; then
-			merge_init_files
-			exec "$@" --init-file="$INIT_DB_FILE_PATH"
-		fi
 	fi
 	echo '[ the setup is now complete ]'
 	exec "$@"
@@ -74,20 +70,6 @@ setup_directory__pid_file() {
 	mkdir -p "$pid_file_directory"
 	chown -R mysql:mysql "$pid_file_directory"
 	ls -ld "$pid_file_directory"
-}
-
-##### Config Files #####
-
-merge_init_files() {
-	local init_db_file_dir="${INIT_DB_FILE_DIR:-/etc/mysql/initdb.d}"
-	local init_db_file="${INIT_DB_FILE_PATH:-/etc/mysql/initdb.sql}"
-	echo 'merge init-files'
-	mkdir -p "$init_db_file_dir"
-	touch "$init_db_file"
-	for file in $(find "$init_db_file_dir" -name "*.sql" | sort); do
-		cat "$file" >> "$init_db_file"
-		echo -e ';' >> "$init_db_file"
-	done
 }
 
 ##### Mariadb Server #####
