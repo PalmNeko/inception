@@ -37,13 +37,21 @@ setup_database() {
 
 	tmpfile="$(mktemp)"
 	add_exit_rm_file "$tmpfile"
+	
+	# SQLs
 	flush_privileges >> "$tmpfile"
-	sql_install_ed25519 >> "$tmpfile"
+	
+	change_plugin "root" "localhost" "mysql_native_password" >> "$tmpfile"
 	setup_root_password >> "$tmpfile"
-	create_wordpress_user >> "$tmpfile"
+
+	create_user "wordpress" "%" >> "$tmpfile"
+	change_plugin "wordpress" "%" "mysql_native_password" >> "$tmpfile"
+	set_wordpress_password >> "$tmpfile"
+	
 	create_wordpress_database >> "$tmpfile"
 	grant_wordpress_database >> "$tmpfile"
-
+	
+	# execute SQLs
 	execute_sql_at_temporary_server "$(cat "$tmpfile")"
 
 	rm -f "$tmpfile"
@@ -63,7 +71,7 @@ setup_root_password() {
 	setup_password "root" "localhost" "$(cat_password $ROOT_PASS_FILE)"
 }
 
-create_wordpress_user() {
+set_wordpress_password() {
 	if [ -z "$WP_DB_PASS_FILE" ]; then
 		echo 'Error: You must set environment: WP_DB_PASS_FILE' > /dev/stderr
 		exit 1
@@ -73,8 +81,7 @@ create_wordpress_user() {
 	fi
 
 	local password="$(cat "$WP_DB_PASS_FILE")"
-
-	create_user "wordpress" "%" "$password"
+	setup_password "wordpress" "%" "$password"
 }
 
 create_wordpress_database() {
@@ -160,11 +167,8 @@ check_temporary_server_initialized() {
 
 setup_password() {
 	local user="$1" host="$2" password="$3"
-	echo "ALTER USER '$user'@'$host' IDENTIFIED VIA ed25519 USING PASSWORD('$password');"
-}
-
-sql_install_ed25519() {
-	echo "INSTALL SONAME 'auth_ed25519';"
+	echo "ALTER USER '$user'@'$host' IDENTIFIED VIA mysql_native_password;"
+	echo "SET PASSWORD FOR '$user'@'$host' = PASSWORD('$password');"
 }
 
 flush_privileges() {
@@ -172,8 +176,13 @@ flush_privileges() {
 }
 
 create_user() {
-	local user="$1" host="${2:-"%"}" password="$3"
-	echo "CREATE USER IF NOT EXISTS '$user'@'$host' IDENTIFIED VIA ed25519 USING PASSWORD('$password');"
+	local user="$1" host="${2:-"%"}"
+	echo "CREATE USER IF NOT EXISTS '$user'@'$host';"
+}
+
+change_plugin() {
+	local user="$1" host="$2" plugin="$3"
+	echo "ALTER USER '$user'@'$host' IDENTIFIED VIA $plugin;"
 }
 
 create_database() {
