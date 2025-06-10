@@ -133,7 +133,7 @@ execute_sql_at_temporary_server() {
 
 start_temporary_server() {
 	echo 'Start temporary server'
-	mariadbd --skip-grant-tables &
+	mariadbd --skip-grant-tables --skip-networking &
 	echo "$!"
 	declare -g MARIADB_PID
 	MARIADB_PID=$!
