@@ -104,3 +104,7 @@
  ```sh
  sudo apt-get install -y make
  ```
+
+ # Virtual Box
+ ## ターミナルが起動しない時
+ * [ターミナルが起動しない時](https://qiita.com/towamz/items/2052f08e9e1af4068a56)
