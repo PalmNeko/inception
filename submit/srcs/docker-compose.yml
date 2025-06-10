@@ -50,6 +50,12 @@ services:
     environment:
       ROOT_PASS_FILE: ${ROOT_PASS_FILE}
       WP_DB_PASS_FILE: ${WP_DB_PASS_FILE}
+    healthcheck:
+      test: ["CMD-SHELL", "ps -p 1 | grep mariadbd"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
       - backend-network
     configs:
@@ -130,7 +136,8 @@ services:
     volumes:
       - wordpress-data:/srv/wordpress/
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy
 
 # configs
 configs:

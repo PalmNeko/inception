@@ -34,7 +34,6 @@ extract_wordpress() {
 
 ##### initialize wordpress #####
 initialize_wordpress() {
-	wait_database_up
 	setup_wordpress_database
 }
 
@@ -93,21 +92,6 @@ has_wordpress_config() {
 ##### utils #####
 cat_password() {
 	cat $1 | tr -d '\n'
-}
-
-wait_database_up() {
-	echo "Waiting database server..."
-	local wait_time=30
-	for i in $(seq $wait_time); do
-		if nc -vz mariadb 3306; then
-			return 0		
-		fi
-		sleep 1;
-	done
-	if [ "$i" = "$wait_time" ]; then
-		echo "Error: Can't connect database" > /dev/stderr;
-		exit 1
-	fi
 }
 
 ##### MAIN #####
