@@ -98,8 +98,8 @@ cat_password() {
 wait_database_up() {
 	echo "Waiting database server..."
 	local wait_time=30
-	for i in {0..$wait_time}; do
-		if nc -vz mariadb 3306 > /dev/null 2> /dev/null; then
+	for i in $(seq $wait_time); do
+		if nc -vz mariadb 3306; then
 			return 0		
 		fi
 		sleep 1;
