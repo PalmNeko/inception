@@ -49,6 +49,7 @@ services:
     env_file: ${MARIADB_CONTEXT}/.env
     environment:
       ROOT_PASS_FILE: ${ROOT_PASS_FILE}
+      WP_DB_PASS_FILE: ${WP_DB_PASS_FILE}
     networks:
       - backend-network
     configs:
@@ -59,6 +60,8 @@ services:
     secrets:
       - source: db_root_password
         target: ${ROOT_PASS_FILE}
+      - source: wp_db_pass_file
+        target: /mariadb/wordpress-password
     volumes:
       - mariadbd-data:/var/lib/mysql
     develop:
@@ -133,6 +136,7 @@ configs:
   mariadb_mariadb_server_config:
     file: ${MARIADB_CONTEXT}/dist/conf/mysql/mariadb.conf.d/50-server.cnf
 
+# secrets
 secrets:
   ssl_key:
     file: ${SECRETS_CONTEXT}/nginx/ssl.key
@@ -140,6 +144,8 @@ secrets:
     file: ${SECRETS_CONTEXT}/nginx/ssl.crt
   db_root_password:
     file: ${SECRETS_CONTEXT}/db_root_password.txt
+  wp_db_pass_file:
+    file: ${SECRETS_CONTEXT}/db_password.txt
 
 # volumes
 volumes:

@@ -8,6 +8,7 @@ main () {
 	echo '[ start mariadbd container ]'
 
 	if [ "$1" = "mariadbd" ]; then
+		set_exit_trap
 		setup_mariadbd
 	fi
 	echo '[ the setup is now complete ]'
@@ -34,11 +35,19 @@ setup_mariadbd () {
 setup_database() {
 	local sql
 
-	sql+=$(flush_privileges)$(echo)
-	sql+=$(sql_install_ed25519)$(echo)
-	sql+=$(setup_root_password)$(echo)
+	tmpfile="$(mktemp)"
+	add_exit_rm_file "$tmpfile"
+	flush_privileges >> "$tmpfile"
+	sql_install_ed25519 >> "$tmpfile"
+	setup_root_password >> "$tmpfile"
+	create_wordpress_user >> "$tmpfile"
+	create_wordpress_database >> "$tmpfile"
+	grant_wordpress_database >> "$tmpfile"
 
-	execute_sql_at_temporary_server "$sql"
+	execute_sql_at_temporary_server "$(cat "$tmpfile")"
+
+	rm -f "$tmpfile"
+	remove_exit_rm_file "$tmpfile"
 }
 
 ##### SQL logics #####
@@ -52,6 +61,32 @@ setup_root_password() {
 		exit 1
 	fi
 	setup_password "root" "localhost" "$(cat_password $ROOT_PASS_FILE)"
+}
+
+create_wordpress_user() {
+	if [ -z "$WP_DB_PASS_FILE" ]; then
+		echo 'Error: You must set environment: WP_DB_PASS_FILE' > /dev/stderr
+		exit 1
+	elif ! [ -f "$WP_DB_PASS_FILE" ]; then
+		echo "Error: $WP_DB_PASS_FILE: No such file or directory" > /dev/stderr
+		exit 1
+	fi
+
+	local password="$(cat "$WP_DB_PASS_FILE")"
+
+	create_user "wordpress" "%" "$password"
+}
+
+create_wordpress_database() {
+	create_database wordpress
+}
+
+grant_wordpress_database() {
+	local priv_types="SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER"
+	local priv_level="wordpress.*"
+	local user_specification="'wordpress'@'%'"
+
+	grant_table "$priv_types" "$priv_level" "$user_specification"
 }
 
 ##### setup run directory (pid and socket)  #####
@@ -136,6 +171,23 @@ flush_privileges() {
 	echo "FLUSH PRIVILEGES;"
 }
 
+create_user() {
+	local user="$1" host="${2:-"%"}" password="$3"
+	echo "CREATE USER IF NOT EXISTS '$user'@'$host' IDENTIFIED VIA ed25519 USING PASSWORD('$password');"
+}
+
+create_database() {
+	local dbname="$1"
+	echo "CREATE DATABASE IF NOT EXISTS $dbname;"
+}
+
+grant_table() {
+	local priv_types="$1" priv_level="$2" user_specification="$3" password="$4"
+	echo "GRANT $priv_types"
+	echo "  ON $priv_level"
+	echo "  TO $user_specification;"
+}
+
 ##### SQL Instruction Buffer #####
 
 append_instruction() {
@@ -169,6 +221,34 @@ check_env() {
 			echo "✅ $env_name"
 		else
 			echo "❌ $env_name"
+		fi
+	done
+}
+
+##### Exit Trap #####
+
+set_exit_trap() {
+	trap exit_handler EXIT
+}
+
+exit_handler() {
+	for file in "${g_delete_files[@]}"; do
+		rm -f "$file"
+	done
+}
+
+add_exit_rm_file() {
+	declare -a g_delete_files;
+
+	local file="$1"
+
+	g_delete_files+=("$file")
+}
+
+remove_exit_rm_file() {
+	for key in "${!g_delete_files[@]}"; do
+		if [ "${g_delete_files["$key"]}" = "$file" ]; then
+			unset g_delete_files["$key"]
 		fi
 	done
 }
