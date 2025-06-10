@@ -132,6 +132,7 @@ execute_sql_at_temporary_server() {
 }
 
 start_temporary_server() {
+	echo 'Start temporary server'
 	mariadbd --skip-grant-tables &
 	echo "$!"
 	declare -g MARIADB_PID
@@ -139,6 +140,7 @@ start_temporary_server() {
 }
 
 stop_temporary_server() {
+	echo 'Stop temporary server'
 	local mariadb_pid="$1";
 	kill "$mariadb_pid"
 	wait "$mariadb_pid"
