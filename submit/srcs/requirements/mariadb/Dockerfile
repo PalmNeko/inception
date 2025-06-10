@@ -1,5 +1,7 @@
-ARG DEBIAN_VERSION=11.11-slim
-FROM debian:${DEBIAN_VERSION}
+# arguments
+ARG BASE_IMAGE
+
+FROM ${BASE_IMAGE}
 
 RUN <<EOF
 apt-get -y update

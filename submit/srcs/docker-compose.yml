@@ -46,7 +46,7 @@ services:
       context: requirements/mariadb
       dockerfile: Dockerfile
       args:
-        BASE_IMAGE: ${BASE_IMAGE}
+        <<: *common-arg
     env_file: ${MARIADB_CONTEXT}/.env
     environment:
       ROOT_PASS_FILE: ${ROOT_PASS_FILE}
@@ -84,8 +84,7 @@ services:
       context: ${NGINX_CONTEXT}
       dockerfile: Dockerfile
       args:
-        BASE_IMAGE: ${BASE_IMAGE}
-        DOMAIN: ${DOMAIN}
+        <<: *common-arg
       target: prod
     ports:
       - ${OPEN_PORT}:443
