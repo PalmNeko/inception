@@ -50,7 +50,6 @@ services:
       target: prod
     ports:
       - ${OPEN_PORT}:443
-    env_file: ${NGINX_CONTEXT}/.env
     environment:
       SSL_CRT_MOUNT_PATH: ${SSL_CRT_MOUNT_PATH}
       SSL_KEY_MOUNT_PATH: ${SSL_KEY_MOUNT_PATH}
@@ -85,7 +84,6 @@ services:
       dockerfile: Dockerfile
       args:
         <<: *common-arg
-    env_file: ${WORDPRESS_CONTEXT}/.env
     environment:
       WP_DB_PASS_FILE: ${WP_DB_PASS_FILE}
     networks:
@@ -147,7 +145,7 @@ configs:
   nginx_wordpress_config:
     file: ${NGINX_CONTEXT}/dist/conf/conf.d/ssl.conf
   wordpress_php_fpm_pool_dir:
-    file: ${WORDPRESS_CONTEXT}/dist/conf/fpm/pool.d
+    file: ${WORDPRESS_CONTEXT}/conf/fpm/pool.d
   mariadb_mariadb_config:
     file: ${MARIADB_CONTEXT}/conf/mysql/mariadb.cnf
   mariadb_mariadb_server_config:

@@ -22,7 +22,7 @@ up: init
 detach: CMD_FLAGS += -d
 detach: up
 
-init: compose-init secrets nginx-init wordpress-init
+init: compose-init secrets nginx-init
 
 logs: CMD_FLAGS += -f
 stats restart down watch build logs:
@@ -99,7 +99,6 @@ COMPOSE_ENV_FILE          = $(COMPOSE_CONTEXT)/.env
 COMPOSE_SAMPLE_ENV        = $(COMPOSE_CONTEXT)/.env.sample
 
 NGINX_TOOL_CONTEXT        = srcs/requirements/nginx/tools
-WORDPRESS_TOOL_CONTEXT    = srcs/requirements/wordpress/tools
 
 clean:
 	$(MAKE) -C $(NGINX_TOOL_CONTEXT) clean
@@ -112,9 +111,6 @@ fclean:
 
 nginx-init:
 	bash -c "$(MAKE) -C $(NGINX_TOOL_CONTEXT)"
-
-wordpress-init:
-	bash -c "$(MAKE) -C $(WORDPRESS_TOOL_CONTEXT)"
 
 compose-init: $(COMPOSE_ENV_FILE)
 

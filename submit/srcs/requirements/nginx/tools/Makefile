@@ -4,8 +4,6 @@ COMPOSE_CONTEXT      = ../../../
 COMPOSE_ENV_FILE      = $(COMPOSE_CONTEXT)/.env
 
 NGINX_CONTEXT        = ..
-NGINX_ENV_FILE       = $(NGINX_CONTEXT)/.env
-NGINX_ENV_FILES      = $(NGINX_ENV_FILE) $(COMPOSE_ENV_FILE)
 NGINX_ENV_GEN_SCRIPT = $(NGINX_CONTEXT)/tools/print_new_env.sh
 NGINX_CONF_DIR       = $(NGINX_CONTEXT)/conf
 NGINX_CONF_DIST_DIR  = $(NGINX_CONTEXT)/dist/conf
@@ -28,9 +26,9 @@ $(NGINX_ENV_FILE): $(NGINX_ENV_GEN_SCRIPT)
 	@bash $< > $@ || (rm $@ ; exit 1)
 	@echo 'created $@'
 
-$(NGINX_CONF_DIST_DIR)/%: $(NGINX_CONF_DIR)/% $(NGINX_ENV_FILE) $(COMPOSE_ENV_FILE)
+$(NGINX_CONF_DIST_DIR)/%: $(NGINX_CONF_DIR)/% $(COMPOSE_ENV_FILE)
 	@mkdir -p $(@D)
-	@$(call load_environment,$(COMPOSE_ENV_FILE)) $(call load_environment,$(NGINX_ENV_FILE)) \
+	@$(call load_environment,$(COMPOSE_ENV_FILE)) \
 			$(call generate_conf_file,$<,$@)
 	@echo 'created $@'
 
