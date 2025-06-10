@@ -13,7 +13,7 @@
 #
 
 user                    = mysql
-pid-file                = {{MARIADB_PID_FILE}}
+pid-file                = /run/mysqld/mysqld.pid
 basedir                 = /usr
 datadir                 = /var/lib/mysql
 tmpdir                  = /tmp

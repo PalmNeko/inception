@@ -22,7 +22,7 @@ up: init
 detach: CMD_FLAGS += -d
 detach: up
 
-init: compose-init secrets mariadb-init nginx-init wordpress-init
+init: compose-init secrets nginx-init wordpress-init
 
 logs: CMD_FLAGS += -f
 stats restart down watch build logs:
@@ -82,7 +82,7 @@ install-network-tools:
 
 install-utils:
 	$(COMPOSE) exec $(service) apt-get install -y \
-		vim-tiny \
+		vim-tiny \MARIADB_PID_FILE
 		man \
 		apt-file \
 		less \
@@ -100,17 +100,14 @@ COMPOSE_SAMPLE_ENV        = $(COMPOSE_CONTEXT)/.env.sample
 
 NGINX_TOOL_CONTEXT        = srcs/requirements/nginx/tools
 WORDPRESS_TOOL_CONTEXT    = srcs/requirements/wordpress/tools
-MARIDB_TOOL_CONTEXT       = srcs/requirements/mariadb/tools
 
 clean:
 	$(MAKE) -C $(NGINX_TOOL_CONTEXT) clean
 	$(MAKE) -C $(WORDPRESS_TOOL_CONTEXT) clean
-	$(MAKE) -C $(MARIDB_TOOL_CONTEXT) clean
 
 fclean:
 	$(MAKE) -C $(NGINX_TOOL_CONTEXT) fclean
 	$(MAKE) -C $(WORDPRESS_TOOL_CONTEXT) fclean
-	$(MAKE) -C $(MARIDB_TOOL_CONTEXT) fclean
 	rm -f $(COMPOSE_ENV_FILE)
 
 nginx-init:
@@ -118,9 +115,6 @@ nginx-init:
 
 wordpress-init:
 	bash -c "$(MAKE) -C $(WORDPRESS_TOOL_CONTEXT)"
-
-mariadb-init:
-	bash -c "$(MAKE) -C $(MARIDB_TOOL_CONTEXT)"
 
 compose-init: $(COMPOSE_ENV_FILE)
 

@@ -114,7 +114,6 @@ services:
       dockerfile: Dockerfile
       args:
         <<: *common-arg
-    env_file: ${MARIADB_CONTEXT}/.env
     environment:
       ROOT_PASS_FILE: ${ROOT_PASS_FILE}
       WP_DB_PASS_FILE: ${WP_DB_PASS_FILE}
@@ -150,9 +149,9 @@ configs:
   wordpress_php_fpm_pool_dir:
     file: ${WORDPRESS_CONTEXT}/dist/conf/fpm/pool.d
   mariadb_mariadb_config:
-    file: ${MARIADB_CONTEXT}/dist/conf/mysql/mariadb.cnf
+    file: ${MARIADB_CONTEXT}/conf/mysql/mariadb.cnf
   mariadb_mariadb_server_config:
-    file: ${MARIADB_CONTEXT}/dist/conf/mysql/mariadb.conf.d/50-server.cnf
+    file: ${MARIADB_CONTEXT}/conf/mysql/mariadb.conf.d/50-server.cnf
 
 # secrets
 secrets:
