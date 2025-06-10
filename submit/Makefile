@@ -22,7 +22,7 @@ up: init
 detach: CMD_FLAGS += -d
 detach: up
 
-init: secrets mariadb-init nginx-init wordpress-init
+init: compose-init secrets mariadb-init nginx-init wordpress-init
 
 logs: CMD_FLAGS += -f
 stats restart down watch build logs:
@@ -91,8 +91,12 @@ install-utils:
 
 
 #
-# init
+# init environ
 #
+
+COMPOSE_CONTEXT           = srcs
+COMPOSE_ENV_FILE          = $(COMPOSE_CONTEXT)/.env
+COMPOSE_SAMPLE_ENV        = $(COMPOSE_CONTEXT)/.env.sample
 
 NGINX_TOOL_CONTEXT        = srcs/requirements/nginx/tools
 WORDPRESS_TOOL_CONTEXT    = srcs/requirements/wordpress/tools
@@ -107,6 +111,7 @@ fclean:
 	$(MAKE) -C $(NGINX_TOOL_CONTEXT) fclean
 	$(MAKE) -C $(WORDPRESS_TOOL_CONTEXT) fclean
 	$(MAKE) -C $(MARIDB_TOOL_CONTEXT) fclean
+	rm -f $(COMPOSE_ENV_FILE)
 
 nginx-init:
 	bash -c "$(MAKE) -C $(NGINX_TOOL_CONTEXT)"
@@ -116,6 +121,12 @@ wordpress-init:
 
 mariadb-init:
 	bash -c "$(MAKE) -C $(MARIDB_TOOL_CONTEXT)"
+
+compose-init: $(COMPOSE_ENV_FILE)
+
+$(COMPOSE_ENV_FILE): $(COMPOSE_SAMPLE_ENV)
+	whoami
+	test -f "$@" || cp -f $< $@ && touch $@
 
 #
 # secrets
@@ -128,12 +139,17 @@ endif
 SECRETS_DIR      = secrets
 NGINX_SECRET_KEY = $(SECRETS_DIR)/nginx/ssl.key
 NGINX_SECRET_CRT = $(SECRETS_DIR)/nginx/ssl.crt
+DB_PASSWORD      = $(SECRETS_DIR)/db_password.txt
+DB_ROOT_PASSWORD = $(SECRETS_DIR)/db_root_password.txt
 
 .PHONY: secrets
-secrets: $(NGINX_SECRET_KEY) $(NGINX_SECRET_CRT)
+secrets: $(NGINX_SECRET_KEY) $(NGINX_SECRET_CRT) $(DB_PASSWORD) $(DB_ROOT_PASSWORD)
 
 $(NGINX_SECRET_KEY) $(NGINX_SECRET_CRT):
 	mkdir -p $(@D)
 	. $(ENV_FILE) ; openssl req -x509 -nodes -days 15 -newkey rsa:2048 \
 		-keyout "$(NGINX_SECRET_KEY)" -out "$(NGINX_SECRET_CRT)" \
 		-subj "/CN=$(DOMAIN)"
+
+$(DB_PASSWORD) $(DB_ROOT_PASSWORD):
+	echo -n "password" > $@
