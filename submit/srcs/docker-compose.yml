@@ -114,12 +114,17 @@ services:
       args:
         <<: *common-arg
     env_file: ${WORDPRESS_CONTEXT}/.env
+    environment:
+      WP_DB_PASS_FILE: ${WP_DB_PASS_FILE}
     networks:
       - frontend-network
       - backend-network
     configs:
       - source: wordpress_php_fpm_pool_dir
         target: /etc/php/7.4/fpm/pool.d
+    secrets:
+      - source: wp_db_pass_file
+        target: /mariadb/wordpress-password
     volumes:
       - wordpress-data:/srv/wordpress/
 
