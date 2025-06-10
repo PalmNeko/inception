@@ -102,6 +102,8 @@ services:
       - wordpress-data:/srv/wordpress/
     develop:
       <<: *nginx-dev
+    depends_on:
+      - wordpress
 
   wordpress:
     container_name: wordpress
@@ -127,6 +129,8 @@ services:
         target: /mariadb/wordpress-password
     volumes:
       - wordpress-data:/srv/wordpress/
+    depends_on:
+      - mariadb
 
 # configs
 configs:
