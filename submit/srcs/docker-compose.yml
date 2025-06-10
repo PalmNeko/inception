@@ -126,9 +126,9 @@ services:
 # configs
 configs:
   nginx_config:
-    file: ${NGINX_CONTEXT}/dist/conf/nginx/nginx.conf
+    file: ${NGINX_CONTEXT}/dist/conf/nginx.conf
   nginx_wordpress_config:
-    file: ${NGINX_CONTEXT}/dist/conf/ssl.conf
+    file: ${NGINX_CONTEXT}/dist/conf/conf.d/ssl.conf
   wordpress_php_fpm_pool_dir:
     file: ${WORDPRESS_CONTEXT}/dist/conf/fpm/pool.d
   mariadb_mariadb_config:
