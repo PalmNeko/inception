@@ -86,7 +86,7 @@ services:
         DOMAIN: ${DOMAIN}
       target: prod
     ports:
-      - 4430:443
+      - ${OPEN_PORT}:443
     env_file: ${NGINX_CONTEXT}/.env
     environment:
       SSL_CRT_MOUNT_PATH: ${SSL_CRT_MOUNT_PATH}
@@ -186,4 +186,4 @@ networks:
     <<: *external-container-network
   backend-network:
     name: inception-backend
-    <<: *external-container-network
+    <<: *internal-container-network
