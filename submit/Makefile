@@ -29,7 +29,9 @@ stats restart down watch build logs:
 	$(COMPOSE_ENV) $(COMPOSE) $@ $(CMD_FLAGS) $(service)
 
 clean-volumes:
+	ls ~/data
 	docker run --mount type=bind,source=$(HOME)/data,target=/data --rm alpine sh -c "rm -rf /data/*"
+	ls ~/data
 
 re: build up
 
