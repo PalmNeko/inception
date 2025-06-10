@@ -69,8 +69,6 @@ create_wordpress_config() {
 		--dbuser=wordpress \
 		--dbhost=mariadb \
 		--dbpass="$(get_wordpress_db_password)"
-	printf "config mode: "
-	ls -l /srv/wordpress/wp-config.php
 }
 
 set_wordpress_config_pass() {
