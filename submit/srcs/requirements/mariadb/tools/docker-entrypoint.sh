@@ -85,7 +85,7 @@ execute_sql_at_temporary_server() {
 	echo "SQL:"
 	echo "$sql"
 	
-	mariadb -u root -h localhost -e "$(get_instructions)"
+	mariadb -u root -h localhost -e "$sql"
 	stop_temporary_server "$mariadb_pid"
 }
 
