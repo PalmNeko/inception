@@ -37,6 +37,7 @@ x-inception-external-network: &external-container-network
 # services
 services:
   mariadb:
+    restart: on-failure
     container_name: mariadb
     hostname: mariadb
     pull_policy: never
@@ -74,6 +75,7 @@ services:
       <<: *mariadb-dev
 
   nginx:
+    restart: on-failure
     container_name: nginx
     hostname: nginx
     pull_policy: never
@@ -112,6 +114,7 @@ services:
       - wordpress
 
   wordpress:
+    restart: on-failure
     container_name: wordpress
     hostname: wordpress
     pull_policy: never
